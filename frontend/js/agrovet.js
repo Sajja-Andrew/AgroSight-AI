@@ -21,13 +21,48 @@ let onlineUsers = {};
 let typingTimeout = null;
 
 // ============================================================
+// GEOLOCATION HELPERS
+// ============================================================
+
+function getUserGeolocation() {
+    return new Promise((resolve) => {
+        if (!navigator.geolocation) {
+            resolve({ lat: null, lng: null });
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+            () => resolve({ lat: null, lng: null }),
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+        );
+    });
+}
+
+async function updateBackendLocation(lat, lng) {
+    try {
+        const res = await fetch(API_BASE_URL + '/auth/location', {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ latitude: lat, longitude: lng })
+        });
+        if (res.ok) {
+            currentUser.latitude = lat;
+            currentUser.longitude = lng;
+            localStorage.setItem('AgroSightAI_current_user', JSON.stringify(currentUser));
+        }
+    } catch (e) {
+        console.warn('Failed to update backend location:', e);
+    }
+}
+
+// ============================================================
 // INITIALIZATION
 // ============================================================
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     console.log('Agro-Vet dashboard loading...');
 
-    checkAuth();
+    await checkAuth();
     initTheme();
     initNavigation();
     initMobileMenu();
@@ -80,6 +115,12 @@ async function checkAuth() {
         }
     } catch (e) {
         console.warn('Auth validation failed, using cached user.', e);
+    }
+
+    // Get geolocation and update backend
+    const geo = await getUserGeolocation();
+    if (geo.lat != null && geo.lng != null && currentUser) {
+        await updateBackendLocation(geo.lat, geo.lng);
     }
 
     console.log('User loaded:', currentUser.username);
@@ -496,6 +537,15 @@ function initSocketIO() {
                     avatar: currentUser.profilePicture || ''
                 });
             }
+            if (window._heartbeatInterval) clearInterval(window._heartbeatInterval);
+            window._heartbeatInterval = setInterval(() => {
+                if (currentUser) {
+                    fetch(API_BASE_URL + '/users/online', {
+                        method: 'POST',
+                        headers: getAuthHeaders()
+                    }).catch(() => {});
+                }
+            }, 60000);
         });
 
         socket.on('users_online', (users) => {

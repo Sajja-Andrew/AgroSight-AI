@@ -16,7 +16,16 @@
       "Bash(docker compose *)",
       "Bash(docker pull *)",
       "Bash(docker buildx *)",
-      "Bash(docker stats *)"
+      "Bash(docker stats *)",
+      "Bash(Get-ChildItem -Recurse -Force)",
+      "Bash(Select-Object FullName, PSIsContainer)",
+      "Bash(Format-Table -AutoSize)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(python *)",
+      "Bash(node --check frontend/server/server.js)",
+      "Bash(git config *)"
     ]
   }
 }

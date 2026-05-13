@@ -23,15 +23,85 @@ let conversations = {};
 let socket = null;
 let onlineUsers = {};
 let typingTimeout = null;
+let nearbyAgrovets = []; // cached from backend API
+let farmerGeo = { lat: null, lng: null };
+
+// ============================================================
+// GEOLOCATION HELPERS
+// ============================================================
+
+function getUserGeolocation() {
+    return new Promise((resolve) => {
+        if (!navigator.geolocation) {
+            resolve({ lat: null, lng: null });
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+            () => resolve({ lat: null, lng: null }),
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+        );
+    });
+}
+
+async function updateBackendLocation(lat, lng) {
+    try {
+        const res = await fetch(API_BASE_URL + '/auth/location', {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ latitude: lat, longitude: lng })
+        });
+        if (res.ok) {
+            currentUser.latitude = lat;
+            currentUser.longitude = lng;
+            localStorage.setItem('AgroSightAI_current_user', JSON.stringify(currentUser));
+        }
+    } catch (e) {
+        console.warn('Failed to update backend location:', e);
+    }
+}
+
+async function loadNearbyAgrovets() {
+    if (farmerGeo.lat == null || farmerGeo.lng == null) {
+        // Fallback to old localStorage method
+        return loadRegisteredAgrovetsLegacy();
+    }
+    try {
+        const res = await fetch(
+            API_BASE_URL + '/agrovets/nearby?lat=' + farmerGeo.lat + '&lng=' + farmerGeo.lng + '&radius=50&limit=50'
+        );
+        const data = await res.json();
+        if (data.success) {
+            nearbyAgrovets = data.agrovets || [];
+            return nearbyAgrovets;
+        }
+    } catch (e) {
+        console.warn('Nearby agrovets API failed, falling back to legacy:', e);
+    }
+    return loadRegisteredAgrovetsLegacy();
+}
+
+function loadRegisteredAgrovetsLegacy() {
+    const users = JSON.parse(localStorage.getItem('AgroSightAI_users') || '[]');
+    const agrovets = users.filter(u => u.role === 'agrovet');
+    const farmerLocation = (currentUser?.location || '').toLowerCase();
+    const farmerParts = farmerLocation.split(/[\s,]+/).filter(p => p.length > 2);
+    agrovets.sort((a, b) => {
+        const aScore = getLocationMatchScore(a.location, farmerParts);
+        const bScore = getLocationMatchScore(b.location, farmerParts);
+        return bScore - aScore;
+    });
+    return agrovets;
+}
 
 // ============================================================
 // INITIALIZATION
 // ============================================================
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     console.log('Farmer dashboard loading...');
 
-    checkAuth();
+    await checkAuth();
     initTheme();
     initNavigation();
     initMobileMenu();
@@ -39,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initProfile();
     initLogout();
 
-    loadDashboardData();
+    await loadDashboardData();
     renderAgrovetsGrid();
     renderMiniAgrovets();
     renderConversations();
@@ -81,6 +151,17 @@ async function checkAuth() {
         }
     } catch (e) {
         console.warn('Auth validation failed, using cached user.', e);
+    }
+
+    // Get geolocation and update backend
+    const geo = await getUserGeolocation();
+    if (geo.lat != null && geo.lng != null) {
+        farmerGeo = geo;
+        if (currentUser) {
+            await updateBackendLocation(geo.lat, geo.lng);
+        }
+    } else if (currentUser?.latitude && currentUser?.longitude) {
+        farmerGeo = { lat: currentUser.latitude, lng: currentUser.longitude };
     }
 
     console.log('User loaded:', currentUser.username);
@@ -343,7 +424,7 @@ async function loadDashboardData() {
     set('totalMessages', totalMessages);
     set('activeDays', Math.max(activeDays, 1));
 
-    const agrovets = loadRegisteredAgrovets();
+    const agrovets = await loadNearbyAgrovets();
     set('nearbyAgrovets', agrovets.length);
 
     renderRecentDetections(detections.slice(0, 5));
@@ -422,32 +503,31 @@ function isAgrovetOnline(agrovetId) {
 function renderAgrovetsGrid() {
     const container = document.getElementById('agrovetsList');
     if (!container) return;
-    const agrovets = loadRegisteredAgrovets();
+    const agrovets = nearbyAgrovets.length ? nearbyAgrovets : loadRegisteredAgrovetsLegacy();
 
     if (!agrovets.length) {
         container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;text-align:center;padding:60px 20px;"><i class="fas fa-user-md" style="font-size:4rem;opacity:0.3;margin-bottom:16px;"></i><h3 style="margin-bottom:8px;">No Agro-Vets Available</h3><p style="color:var(--text-muted);">No agro-vets have registered in the system yet.</p><p style="color:var(--text-muted);font-size:0.85rem;margin-top:8px;">Check back later or contact support.</p></div>';
         return;
     }
 
-    const farmerParts = (currentUser?.location || '').toLowerCase().split(/[\s,]+/).filter(p => p.length > 2);
-
     container.innerHTML = agrovets.map(agrovet => {
-        const isOnline = isAgrovetOnline(agrovet.id);
-        const avLoc = (agrovet.location || '').toLowerCase();
-        const isNearby = farmerParts.some(p => avLoc.includes(p));
+        const isOnline = agrovet.isOnline || isAgrovetOnline(agrovet.id);
+        const distanceText = (agrovet.distance_km != null)
+            ? '<span style="font-size:0.7rem;background:var(--primary-light);color:var(--primary);padding:2px 8px;border-radius:12px;margin-left:6px;">' + agrovet.distance_km + ' km</span>'
+            : '';
         const initials = (agrovet.username || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
         return '<div class="agrovet-card">' +
             '<div class="agrovet-header"><div class="agrovet-avatar" style="position:relative;">' + escapeHtml(initials) +
             '<span class="status-indicator ' + (isOnline ? 'online' : 'offline') + '"></span></div><div>' +
-            '<div class="agrovet-name">' + escapeHtml(agrovet.username) + (isNearby ? ' <span style="font-size:0.7rem;background:var(--primary-light);color:var(--primary);padding:2px 8px;border-radius:12px;margin-left:6px;">Nearby</span>' : '') + '</div>' +
+            '<div class="agrovet-name">' + escapeHtml(agrovet.username) + distanceText + '</div>' +
             '<div class="agrovet-spec">Crop Health Specialist</div></div></div>' +
             '<div class="agrovet-info"><i class="fas fa-map-marker-alt"></i><span>' + escapeHtml(agrovet.location || 'Location not specified') + '</span></div>' +
             '<div class="agrovet-info"><i class="fas fa-envelope"></i><span>' + escapeHtml(agrovet.email || '-') + '</span></div>' +
             '<div class="agrovet-info"><i class="fas fa-phone"></i><span>' + escapeHtml(agrovet.phone || 'Not provided') + '</span></div>' +
             '<span class="availability ' + (isOnline ? 'available' : 'unavailable') + '"><span class="avail-dot"></span>' + (isOnline ? 'Available Now' : 'Currently Offline') + '</span>' +
             '<div style="display:flex;gap:10px;margin-top:16px;">' +
-            '<button class="btn-contact" onclick="contactAgrovet(\'' + agrovet.id + '\')" style="flex:1;"><i class="fas fa-comment"></i> Message</button>' +
+            '<button class="btn-contact" onclick="contactAgrovet(' + agrovet.id + ')" style="flex:1;"><i class="fas fa-comment"></i> Message</button>' +
             '<a href="tel:' + escapeHtml(agrovet.phone || '') + '" class="btn-contact" style="flex:1;text-decoration:none;display:flex;align-items:center;justify-content:center;background:var(--secondary);"><i class="fas fa-phone"></i> Call</a>' +
             '</div></div>';
     }).join('');
@@ -456,7 +536,7 @@ function renderAgrovetsGrid() {
 function renderMiniAgrovets() {
     const container = document.getElementById('miniAgrovets');
     if (!container) return;
-    const agrovets = loadRegisteredAgrovets();
+    const agrovets = nearbyAgrovets.length ? nearbyAgrovets : loadRegisteredAgrovetsLegacy();
 
     if (!agrovets.length) {
         container.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;text-align:center;">No agro-vets registered yet</p>';
@@ -464,17 +544,18 @@ function renderMiniAgrovets() {
     }
 
     container.innerHTML = agrovets.slice(0, 5).map(agrovet => {
-        const online = isAgrovetOnline(agrovet.id);
+        const online = agrovet.isOnline || isAgrovetOnline(agrovet.id);
+        const distLabel = (agrovet.distance_km != null) ? agrovet.distance_km + ' km' : (agrovet.location || 'Unknown');
         const initials = (agrovet.username || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-        return '<div class="mini-agrovet" onclick="contactAgrovet(\'' + agrovet.id + '\')" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-tertiary);border-radius:var(--radius);margin-bottom:10px;cursor:pointer;transition:var(--transition);">' +
+        return '<div class="mini-agrovet" onclick="contactAgrovet(' + agrovet.id + ')" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-tertiary);border-radius:var(--radius);margin-bottom:10px;cursor:pointer;transition:var(--transition);">' +
             '<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:white;font-weight:600;">' + escapeHtml(initials) + '</div>' +
-            '<div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:0.85rem;">' + escapeHtml((agrovet.username || '').split(' ')[0]) + '</div><div style="font-size:0.7rem;color:var(--text-muted);">' + escapeHtml((agrovet.location || '').split(',')[0] || 'Unknown') + '</div></div>' +
+            '<div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:0.85rem;">' + escapeHtml((agrovet.username || '').split(' ')[0]) + '</div><div style="font-size:0.7rem;color:var(--text-muted);">' + escapeHtml(distLabel) + '</div></div>' +
             '<div style="width:8px;height:8px;border-radius:50%;background:' + (online ? 'var(--success)' : '#9ca3af') + ';"></div></div>';
     }).join('');
 }
 
 function contactAgrovet(agrovetId) {
-    const agrovets = loadRegisteredAgrovets();
+    const agrovets = nearbyAgrovets.length ? nearbyAgrovets : loadRegisteredAgrovetsLegacy();
     const agrovet = agrovets.find(a => a.id == agrovetId);
     if (!agrovet) return;
 
@@ -482,6 +563,16 @@ function contactAgrovet(agrovetId) {
     navigateTo('messages');
     setTimeout(() => openChat(convId), 150);
     showToast('Opening chat with ' + agrovet.username, 'info');
+}
+
+function autoSelectNearestAgrovet() {
+    if (!nearbyAgrovets.length) {
+        showToast('No nearby agro-vets found.', 'warning');
+        return;
+    }
+    const nearest = nearbyAgrovets[0];
+    contactAgrovet(nearest.id);
+    showToast('Auto-connected to nearest agro-vet: ' + nearest.username + ' (' + nearest.distance_km + ' km)', 'success');
 }
 
 // ============================================================
@@ -706,6 +797,16 @@ function initSocketIO() {
                     avatar: currentUser.profilePicture || ''
                 });
             }
+            // Start backend heartbeat for online status
+            if (window._heartbeatInterval) clearInterval(window._heartbeatInterval);
+            window._heartbeatInterval = setInterval(() => {
+                if (currentUser) {
+                    fetch(API_BASE_URL + '/users/online', {
+                        method: 'POST',
+                        headers: getAuthHeaders()
+                    }).catch(() => {});
+                }
+            }, 60000);
         });
 
         socket.on('users_online', (users) => {
@@ -765,7 +866,7 @@ function initSocketIO() {
 function renderConversations() {
     const container = document.getElementById('conversationList');
     if (!container) return;
-    const agrovets = loadRegisteredAgrovets();
+    const agrovets = nearbyAgrovets.length ? nearbyAgrovets : loadRegisteredAgrovetsLegacy();
     loadConversations();
 
     if (!agrovets.length) {

@@ -68,6 +68,21 @@
         };
     }
 
+    // Geolocation helper
+    function getGeolocation() {
+        return new Promise((resolve) => {
+            if (!navigator.geolocation) {
+                resolve({ latitude: null, longitude: null });
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                (pos) => resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
+                () => resolve({ latitude: null, longitude: null }),
+                { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+            );
+        });
+    }
+
     // Sign Up Form Handler
     const signupForm = document.getElementById('signupForm');
     if (signupForm) {
@@ -91,11 +106,19 @@
                 return;
             }
 
+            showNotification('Detecting location...', 'info');
+            const geo = await getGeolocation();
+
             try {
+                const payload = { username, email, password, phone, role, location };
+                if (geo.latitude !== null && geo.longitude !== null) {
+                    payload.latitude = geo.latitude;
+                    payload.longitude = geo.longitude;
+                }
                 const res = await fetch(API_BASE_URL + '/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, email, password, phone, role, location })
+                    body: JSON.stringify(payload)
                 });
                 const data = await res.json();
 
