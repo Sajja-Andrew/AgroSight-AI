@@ -25,9 +25,18 @@ import logging
 # ── CONFIG ──
 import config as app_config
 
-# Configure logging
-logging.basicConfig(level=getattr(logging, app_config.LOG_LEVEL), format='%(asctime)s [%(levelname)s] %(message)s')
+# Configure structured logging
+logging.basicConfig(
+    level=getattr(logging, app_config.LOG_LEVEL),
+    format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 logger = logging.getLogger(__name__)
+
+# Suppress noisy TF warnings
+import warnings
+warnings.filterwarnings('ignore', category=RuntimeWarning)
+warnings.filterwarnings('ignore', category=DeprecationWarning)
 
 app = Flask(__name__)
 
@@ -102,7 +111,29 @@ def admin_required(fn):
 # ── MODELS ──
 from model_loader import load_models
 
+logger.info("Loading AI models (this may take a moment)...")
 predictor, leaf_detector, model_loaded, leaf_model_loaded, model_engine = load_models(app_config)
+logger.info(f"Models loaded — disease: {model_loaded} ({model_engine}), leaf_detector: {leaf_model_loaded}")
+
+# ── MODEL WARMUP ──
+# Pre-warm models with a dummy inference to avoid cold-start latency
+if model_loaded and predictor is not None:
+    try:
+        import numpy as np
+        from PIL import Image
+        _warmup_img = Image.new('RGB', (224, 224), (34, 139, 34))
+        predictor.predict(_warmup_img)
+        logger.info("Disease model warmup complete")
+    except Exception as e:
+        logger.warning(f"Disease model warmup failed: {e}")
+
+if leaf_detector is not None:
+    try:
+        _warmup_img = Image.new('RGB', (224, 224), (34, 139, 34))
+        leaf_detector.predict(_warmup_img)
+        logger.info("Leaf detector warmup complete")
+    except Exception as e:
+        logger.warning(f"Leaf detector warmup failed: {e}")
 
 # ── DISEASE INFO LOOKUP ──
 DISEASE_INFO = {}
@@ -277,10 +308,11 @@ def build_chat_response(message, last_detection=None):
 def home():
     return jsonify({
         'status': 'success',
-        'message': 'Smart Crop AI - Disease Detection API',
-        'version': '3.0.0',
+        'message': 'AgroSight AI - Crop Disease Detection API',
+        'version': '3.1.0',
         'model_loaded': model_loaded,
         'leaf_detector_loaded': leaf_model_loaded,
+        'model_engine': model_engine,
         'endpoints': {
             '/api/analyze': 'POST - Full pipeline: leaf check + disease detection',
             '/api/chat': 'POST - AI assistant',
@@ -288,21 +320,35 @@ def home():
             '/api/auth/login': 'POST - Log in',
             '/api/auth/admin/login': 'POST - Admin log in',
             '/api/auth/me': 'GET/PUT - Profile',
+            '/api/auth/change-password': 'POST - Change own password',
+            '/api/auth/forgot-password': 'POST - Request password reset token',
+            '/api/auth/reset-password': 'POST - Reset password with token',
             '/api/detections': 'GET - Detection history',
             '/api/messages': 'POST - Send message',
             '/api/messages/conversations': 'GET - Conversations',
             '/api/feedback': 'POST - Submit feedback',
             '/api/health': 'GET - Health check',
-            '/api/model-status': 'GET - Model status'
+            '/api/model-status': 'GET - Model status',
+            '/api/admin/users': 'GET - Admin: list users',
+            '/api/admin/users/<id>': 'GET/PUT/DELETE - Admin: manage user',
+            '/api/admin/users/<id>/reset-password': 'POST - Admin: reset user password',
+            '/api/admin/users/<id>/change-password': 'PUT - Admin: change user password directly',
+            '/api/admin/audit-logs': 'GET - Admin: audit logs',
         }
     })
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
+    leaf_method = 'none'
+    if leaf_detector is not None:
+        leaf_method = 'cnn' if (hasattr(leaf_detector, 'model') and leaf_detector.model is not None) else 'heuristic'
     return jsonify({
         'status': 'healthy',
         'model_loaded': model_loaded,
         'leaf_detector_loaded': leaf_model_loaded,
+        'leaf_detection_method': leaf_method,
+        'model_engine': model_engine,
+        'version': '3.0.0',
         'timestamp': datetime.now().isoformat()
     })
 
@@ -561,6 +607,82 @@ def change_password():
         return jsonify({'success': True, 'message': 'Password changed successfully. Please log in again.'})
     except Exception as e:
         logger.error(f"Change password error: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/auth/forgot-password', methods=['POST'])
+@rate_limit(limit=3, window_seconds=300)
+def forgot_password():
+    """Request a password reset token. Token-based reset for users who forgot their password."""
+    try:
+        data = request.get_json() or {}
+        identifier = sanitize_string(data.get('email') or data.get('username') or '', max_length=120)
+
+        if not identifier:
+            return jsonify({'success': False, 'message': 'Email or username is required.'}), 400
+
+        user = User.query.filter((User.email == identifier) | (User.username == identifier)).first()
+        if not user:
+            # Don't reveal whether user exists for security
+            return jsonify({'success': True, 'message': 'If that account exists, a reset token has been generated.'})
+
+        # Generate a secure reset token (valid for 15 minutes)
+        reset_token = secrets.token_urlsafe(32)
+        user.password_reset_token = reset_token
+        user.password_reset_expires = datetime.utcnow() + timedelta(minutes=15)
+        db.session.commit()
+
+        # In production, this would be sent via email. For now, return it directly.
+        logger.info(f"Password reset requested for user {user.id}")
+        return jsonify({
+            'success': True,
+            'message': 'Password reset token generated.',
+            'reset_token': reset_token,
+            'user_id': user.id
+        })
+    except Exception as e:
+        logger.error(f"Forgot password error: {e}")
+        return jsonify({'success': False, 'message': 'An error occurred. Please try again.'}), 500
+
+
+@app.route('/api/auth/reset-password', methods=['POST'])
+@rate_limit(limit=5, window_seconds=300)
+def reset_password_with_token():
+    """Reset password using a valid reset token."""
+    try:
+        data = request.get_json() or {}
+        token = data.get('token', '')
+        new_password = data.get('new_password', '')
+
+        if not token or not new_password:
+            return jsonify({'success': False, 'message': 'Token and new password are required.'}), 400
+
+        if len(new_password) < 8:
+            return jsonify({'success': False, 'message': 'Password must be at least 8 characters.'}), 400
+
+        # Find user by reset token
+        user = User.query.filter_by(password_reset_token=token).first()
+        if not user:
+            return jsonify({'success': False, 'message': 'Invalid or expired reset token.'}), 400
+
+        # Check token expiration
+        if not user.password_reset_expires or user.password_reset_expires < datetime.utcnow():
+            user.password_reset_token = None
+            user.password_reset_expires = None
+            db.session.commit()
+            return jsonify({'success': False, 'message': 'Reset token has expired. Please request a new one.'}), 400
+
+        # Reset password
+        change_user_password(user, new_password)
+        user.password_reset_token = None
+        user.password_reset_expires = None
+        user.password_reset_required = False
+        db.session.commit()
+
+        logger.info(f"Password reset completed for user {user.id}")
+        return jsonify({'success': True, 'message': 'Password has been reset successfully. Please log in.'})
+    except Exception as e:
+        logger.error(f"Reset password error: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
 
@@ -852,6 +974,45 @@ def admin_reset_password(user_id):
         return jsonify({'success': True, 'message': 'Password reset successfully.', 'temporaryPassword': temp_password})
     except Exception as e:
         logger.error(f"Admin reset password error: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/admin/users/<int:user_id>/change-password', methods=['PUT'])
+@admin_required
+@rate_limit(limit=5, window_seconds=60)
+def admin_change_user_password(user_id):
+    """Admin directly changes a user's password (no reset required)."""
+    try:
+        admin_uid = int(get_jwt_identity())
+        user = get_user_by_id(user_id)
+        if not user:
+            return jsonify({'success': False, 'message': 'User not found.'}), 404
+
+        data = request.get_json() or {}
+        new_password = data.get('new_password', '')
+
+        if not new_password or len(new_password) < 8:
+            return jsonify({'success': False, 'message': 'New password must be at least 8 characters.'}), 400
+
+        # Direct password change — no reset flag set
+        change_user_password(user, new_password)
+        user.password_reset_required = False  # Admin set it, no forced reset
+        db.session.commit()
+
+        # Audit log
+        log_audit_action(
+            admin_id=admin_uid,
+            action='CHANGE_PASSWORD',
+            target_type='user',
+            target_id=user_id,
+            details=f"Admin changed password for user {user.username}",
+            ip_address=request.remote_addr,
+        )
+
+        logger.info(f"Admin {admin_uid} changed password for user {user_id}")
+        return jsonify({'success': True, 'message': 'Password changed successfully.'})
+    except Exception as e:
+        logger.error(f"Admin change password error: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
 

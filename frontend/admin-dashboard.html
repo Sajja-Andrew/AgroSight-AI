@@ -221,7 +221,7 @@
     <div class="modal" id="resetPasswordModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="fas fa-key"></i> Reset User Password</h3>
+                <h3><i class="fas fa-key"></i> Manage User Password</h3>
             </div>
             <div class="form-group">
                 <label>User ID</label>
@@ -235,6 +235,21 @@
                 <label>Email</label>
                 <input type="text" id="resetUserEmail" readonly>
             </div>
+            <hr style="border-color: var(--border-color); margin: 16px 0;">
+            <h4 style="margin-bottom: 8px; color: var(--text-primary);"><i class="fas fa-edit"></i> Change Password Directly</h4>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">Set a new password for this user. They can log in immediately with it.</p>
+            <div class="form-group">
+                <label>New Password (min 8 chars)</label>
+                <input type="password" id="directNewPassword" placeholder="Enter new password" minlength="8">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-success" onclick="directChangePassword()">
+                    <i class="fas fa-save"></i> Change Password
+                </button>
+            </div>
+            <hr style="border-color: var(--border-color); margin: 16px 0;">
+            <h4 style="margin-bottom: 8px; color: var(--text-primary);"><i class="fas fa-random"></i> Or: Generate Temporary Password</h4>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">Auto-generates a temp password. User must change it on next login.</p>
             <div class="form-group">
                 <label>Temporary Password (auto-generated)</label>
                 <input type="text" id="generatedPassword" readonly style="font-family: monospace; background: var(--bg-secondary);">

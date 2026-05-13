@@ -159,20 +159,43 @@
         </section>
     </div>
 
-    <!-- WhatsApp Support Modal -->
+    <!-- Password Reset Modal -->
     <div class="whatsapp-support-modal" id="whatsappSupportModal">
-        <div class="whatsapp-support-content">
+        <div class="whatsapp-support-content" id="resetStep1">
             <button class="close-modal" id="closeModal">&times;</button>
             <div class="modal-icon">
-                <i class="fab fa-whatsapp"></i>
+                <i class="fas fa-key"></i>
             </div>
-            <h3>Need Help with Password?</h3>
-            <p>Contact our support team via WhatsApp for password reset assistance:</p>
-            <div class="whatsapp-number">+256 (0) 781 503 74</div>
-            <p class="modal-subtitle">Our team is available to help you regain access to your account.</p>
-            <a href="https://wa.me/25678150374" class="whatsapp-btn" target="_blank">
-                <i class="fab fa-whatsapp"></i> Message on WhatsApp
-            </a>
+            <h3>Reset Your Password</h3>
+            <p>Enter your email or username and we'll generate a reset token for you.</p>
+            <div class="form-group" style="margin: 16px 0;">
+                <label for="resetEmail" style="display:block;margin-bottom:6px;color:var(--text-secondary);">Email or Username</label>
+                <input type="text" id="resetEmail" placeholder="Enter your email or username" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);font-size:0.95rem;">
+            </div>
+            <button type="button" class="whatsapp-btn" id="sendResetBtn" onclick="requestPasswordReset()" style="width:100%;justify-content:center;">
+                <i class="fas fa-paper-plane"></i> Send Reset Token
+            </button>
+            <div id="resetError" style="color:#f44336;font-size:0.85rem;margin-top:8px;display:none;"></div>
+        </div>
+        <div class="whatsapp-support-content" id="resetStep2" style="display:none;">
+            <button class="close-modal" onclick="closeResetModal()">&times;</button>
+            <div class="modal-icon">
+                <i class="fas fa-lock-open"></i>
+            </div>
+            <h3>Enter New Password</h3>
+            <p id="resetTokenInfo" style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:12px;"></p>
+            <div class="form-group" style="margin: 16px 0;">
+                <label for="newResetPassword" style="display:block;margin-bottom:6px;color:var(--text-secondary);">New Password</label>
+                <input type="password" id="newResetPassword" placeholder="Minimum 8 characters" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);font-size:0.95rem;">
+            </div>
+            <div class="form-group" style="margin: 8px 0;">
+                <label for="confirmResetPassword" style="display:block;margin-bottom:6px;color:var(--text-secondary);">Confirm Password</label>
+                <input type="password" id="confirmResetPassword" placeholder="Confirm new password" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);font-size:0.95rem;">
+            </div>
+            <button type="button" class="whatsapp-btn" onclick="resetPasswordWithToken()" style="width:100%;justify-content:center;">
+                <i class="fas fa-check"></i> Reset Password
+            </button>
+            <div id="resetStep2Error" style="color:#f44336;font-size:0.85rem;margin-top:8px;display:none;"></div>
         </div>
     </div>
 

@@ -332,6 +332,7 @@ function openResetPasswordModal(userId) {
     document.getElementById('resetUserName').value = user.username;
     document.getElementById('resetUserEmail').value = user.email;
     document.getElementById('generatedPassword').value = '';
+    document.getElementById('directNewPassword').value = '';
     document.getElementById('resetPasswordModal').classList.add('active');
 }
 
@@ -359,6 +360,34 @@ async function confirmResetPassword() {
         }
     } catch (e) {
         showToast('Server error while resetting password', 'error');
+    }
+}
+
+async function directChangePassword() {
+    const userId = parseInt(document.getElementById('resetUserId').value);
+    const newPassword = document.getElementById('directNewPassword').value.trim();
+    if (!userId) return;
+    if (!newPassword || newPassword.length < 8) {
+        showToast('Password must be at least 8 characters', 'error');
+        return;
+    }
+
+    try {
+        const res = await fetch(API_URL + '/admin/users/' + userId + '/change-password', {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ new_password: newPassword })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast('Password changed successfully. The user can now log in with the new password.', 'success');
+            closeResetPasswordModal();
+            loadAllUsers();
+        } else {
+            showToast(data.message || 'Failed to change password', 'error');
+        }
+    } catch (e) {
+        showToast('Server error while changing password', 'error');
     }
 }
 

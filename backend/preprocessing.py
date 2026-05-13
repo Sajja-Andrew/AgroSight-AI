@@ -1,10 +1,18 @@
 """
 Smart Crop AI - Centralized Image Preprocessing
 Ensures training and inference use identical transforms.
+Includes NaN/Inf protection and safe normalization.
 """
 
+import warnings
 import numpy as np
 from PIL import Image
+
+# Suppress numpy runtime warnings during preprocessing
+warnings.filterwarnings('ignore', category=RuntimeWarning)
+
+_EPS = 1e-7  # Small constant for numerical stability
+
 
 def preprocess_image(image, target_size=(224, 224)):
     """
@@ -13,8 +21,9 @@ def preprocess_image(image, target_size=(224, 224)):
     Steps:
     1. Convert to RGB
     2. Resize to target_size
-    3. Convert to numpy array (uint8)
-    4. Add batch dimension
+    3. Convert to numpy array (float32)
+    4. Clamp to valid range [0, 255]
+    5. Add batch dimension
 
     NOTE: We do NOT divide by 255 here because the model includes
     tf.keras.applications.mobilenet_v2.preprocess_input inside the graph.
@@ -31,8 +40,14 @@ def preprocess_image(image, target_size=(224, 224)):
     # Resize
     image = image.resize(target_size, Image.LANCZOS)
 
-    # To numpy array (uint8, 0-255)
+    # To numpy array (float32, 0-255)
     img_array = np.array(image, dtype=np.float32)
+
+    # Clamp to valid pixel range
+    img_array = np.clip(img_array, 0.0, 255.0)
+
+    # Replace any NaN or Inf values
+    img_array = np.where(np.isfinite(img_array), img_array, 0.0)
 
     # Add batch dimension
     img_batch = np.expand_dims(img_array, axis=0)
@@ -44,15 +59,11 @@ def preprocess_batch(images, target_size=(224, 224)):
     """Preprocess a list of PIL Images into a single batch array."""
     arrays = []
     for image in images:
-        if isinstance(image, str):
-            image = Image.open(image)
-        if isinstance(image, np.ndarray):
-            image = Image.fromarray(image)
-        if image.mode != 'RGB':
-            image = image.convert('RGB')
-        image = image.resize(target_size, Image.LANCZOS)
-        arrays.append(np.array(image, dtype=np.float32))
-    return np.stack(arrays, axis=0)
+        arr = preprocess_image(image, target_size=target_size)
+        arrays.append(arr[0])  # Remove batch dim
+    batch = np.stack(arrays, axis=0)
+    batch = np.where(np.isfinite(batch), batch, 0.0)
+    return batch
 
 
 def decode_image(data):

@@ -27,6 +27,8 @@ class User(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
     password_reset_required = db.Column(db.Boolean, default=False)
     last_password_change = db.Column(db.DateTime, default=datetime.utcnow)
+    password_reset_token = db.Column(db.String(256), nullable=True)
+    password_reset_expires = db.Column(db.DateTime, nullable=True)
 
     detections = db.relationship('Detection', backref='user', lazy='dynamic', cascade='all, delete-orphan')
     activities = db.relationship('Activity', backref='user', lazy='dynamic', cascade='all, delete-orphan')

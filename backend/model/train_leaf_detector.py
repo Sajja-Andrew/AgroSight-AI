@@ -296,7 +296,7 @@ def train_leaf_detector(data_dir, model_save_dir='../saved_models', epochs=15):
         'input_size': '224x224',
         'threshold': 0.7,
         'epochs_trained': len(history.history['loss']),
-        'training_date': datetime.now().isoformat()
+        'training_date': datetime.now().isoformat() if 'datetime' in dir() else 'unknown'
     }
     with open(os.path.join(model_save_dir, 'leaf_detector_config.json'), 'w') as f:
         json.dump(config, f, indent=2)

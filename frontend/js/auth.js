@@ -243,7 +243,7 @@ function showNotification(message, type) {
     const iconEl = document.createElement('i');
     iconEl.className = 'fas ' + icon;
     const span = document.createElement('span');
-    span.textContent = message; // safe - textContent
+    span.textContent = message;
 
     notification.appendChild(iconEl);
     notification.appendChild(span);
@@ -263,4 +263,93 @@ function showNotification(message, type) {
         notification.style.animation = 'slideOut 0.3s ease';
         setTimeout(() => notification.remove(), 300);
     }, 3000);
+}
+
+// ── Password Reset ──
+let resetTokenData = null;
+
+async function requestPasswordReset() {
+    const email = document.getElementById('resetEmail')?.value?.trim();
+    const errorEl = document.getElementById('resetError');
+    if (!email) {
+        if (errorEl) { errorEl.textContent = 'Please enter your email or username.'; errorEl.style.display = 'block'; }
+        return;
+    }
+    try {
+        const API_BASE_URL = window.API_CONFIG ? window.API_CONFIG.BASE_URL : 'http://127.0.0.1:5000/api';
+        const res = await fetch(API_BASE_URL + '/auth/forgot-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        if (data.success && data.reset_token) {
+            resetTokenData = { token: data.reset_token, user_id: data.user_id };
+            document.getElementById('resetStep1').style.display = 'none';
+            document.getElementById('resetStep2').style.display = 'block';
+            const info = document.getElementById('resetTokenInfo');
+            if (info) info.textContent = 'Reset token generated. Enter your new password below.';
+            showNotification('Reset token generated! Enter your new password.', 'success');
+        } else {
+            if (errorEl) { errorEl.textContent = data.message || 'No account found with that email.'; errorEl.style.display = 'block'; }
+        }
+    } catch (e) {
+        if (errorEl) { errorEl.textContent = 'Server error. Please try again.'; errorEl.style.display = 'block'; }
+    }
+}
+
+async function resetPasswordWithToken() {
+    const newPassword = document.getElementById('newResetPassword')?.value;
+    const confirmPassword = document.getElementById('confirmResetPassword')?.value;
+    const errorEl = document.getElementById('resetStep2Error');
+
+    if (!newPassword || newPassword.length < 8) {
+        if (errorEl) { errorEl.textContent = 'Password must be at least 8 characters.'; errorEl.style.display = 'block'; }
+        return;
+    }
+    if (newPassword !== confirmPassword) {
+        if (errorEl) { errorEl.textContent = 'Passwords do not match.'; errorEl.style.display = 'block'; }
+        return;
+    }
+    if (!resetTokenData?.token) {
+        if (errorEl) { errorEl.textContent = 'No reset token available. Please try again.'; errorEl.style.display = 'block'; }
+        return;
+    }
+
+    try {
+        const API_BASE_URL = window.API_CONFIG ? window.API_CONFIG.BASE_URL : 'http://127.0.0.1:5000/api';
+        const res = await fetch(API_BASE_URL + '/auth/reset-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: resetTokenData.token, new_password: newPassword })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showNotification('Password reset successfully! Please sign in.', 'success');
+            closeResetModal();
+            // Clear the form
+            document.getElementById('resetEmail').value = '';
+            document.getElementById('newResetPassword').value = '';
+            document.getElementById('confirmResetPassword').value = '';
+            resetTokenData = null;
+            // Show step 1 again for next time
+            document.getElementById('resetStep1').style.display = 'block';
+            document.getElementById('resetStep2').style.display = 'none';
+        } else {
+            if (errorEl) { errorEl.textContent = data.message || 'Failed to reset password.'; errorEl.style.display = 'block'; }
+        }
+    } catch (e) {
+        if (errorEl) { errorEl.textContent = 'Server error. Please try again.'; errorEl.style.display = 'block'; }
+    }
+}
+
+function closeResetModal() {
+    const modal = document.getElementById('whatsappSupportModal');
+    if (modal) modal.style.display = 'none';
+    // Reset steps
+    const step1 = document.getElementById('resetStep1');
+    const step2 = document.getElementById('resetStep2');
+    if (step1) step1.style.display = 'block';
+    if (step2) step2.style.display = 'none';
+    resetTokenData = null;
 }

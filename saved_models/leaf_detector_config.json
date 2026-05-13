@@ -1,0 +1,10 @@
+{
+  "model_type": "MobileNetV2 Binary Classifier",
+  "classes": {"leaf": 1, "not_leaf": 0},
+  "input_size": [224, 224],
+  "threshold": 0.5,
+  "epochs_trained": 0,
+  "training_date": "pending",
+  "fallback_method": "heuristic",
+  "description": "Leaf detector model config. Model file (leaf_detector.keras) must be trained separately using backend/model/train_leaf_detector.py. The system will use heuristic fallback when the model file is absent."
+}

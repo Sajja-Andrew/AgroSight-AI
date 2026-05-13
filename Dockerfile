@@ -40,11 +40,8 @@ RUN pip install --upgrade pip setuptools wheel
 # Copy requirements
 COPY backend/requirements.txt .
 
-# Install Python dependencies with optimizations
-RUN pip install --no-cache-dir \
-    --compile \
-    --no-binary :all: \
-    -r requirements.txt 2>&1 | grep -v "already satisfied" | tail -20
+# Install Python dependencies (cache this layer)
+RUN pip install --no-cache-dir -r requirements.txt 2>&1 | tail -5
 
 # Clean unnecessary files from venv
 RUN find /opt/venv -type d \( -name "__pycache__" -o -name "tests" -o -name "*.egg-info" \) -exec rm -rf {} + 2>/dev/null || true
@@ -56,8 +53,8 @@ RUN find /opt/venv -type f \( -name "*.pyc" -o -name "*.pyo" -o -name "*.so.debu
 FROM python:3.11-slim-bookworm AS production
 
 LABEL maintainer="AgroSight AI Team" \
-      version="3.0.0" \
-      description="Production-ready disease detection API"
+      version="3.1.0" \
+      description="Production-ready crop disease detection API"
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -73,7 +70,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     NUMEXPR_NUM_THREADS=2 \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
-    PORT=5000
+    PORT=5000 \
+    APP_ENV=production
 
 # Install only runtime dependencies (no build tools)
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -82,7 +80,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         liblapack3 \
         libpq5 \
         curl \
-        wget \
         netcat-openbsd \
         libjpeg62-turbo \
         zlib1g \
