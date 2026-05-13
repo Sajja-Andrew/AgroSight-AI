@@ -31,12 +31,12 @@ class LeafDetector:
     Includes comprehensive NaN and division-by-zero protection.
     """
 
-    def __init__(self, model_path=None, config_path=None, threshold=0.7):
+    def __init__(self, model_path=None, config_path=None, threshold=0.5):
         """
         Args:
             model_path: Path to .keras leaf detector model
             config_path: Path to leaf_detector_config.json
-            threshold: Minimum confidence to accept as leaf (default 0.7)
+            threshold: Minimum confidence to accept as leaf (default 0.5 for heuristic, 0.7 for model)
         """
         self.model = None
         self.threshold = float(threshold)
@@ -220,11 +220,12 @@ class LeafDetector:
             else:
                 bbox_ratio = 0.0
 
-            # Composite score (calibrated against typical leaf images)
+                # Composite score (calibrated against typical leaf images)
+            # Improved weighting for heuristic mode
             score = (
-                green_ratio * 0.65 +
-                edge_density * 0.20 +
-                bbox_ratio * 0.15
+                green_ratio * 0.50 +      # Green dominance (primary signal)
+                edge_density * 0.30 +     # Edge density (more weight for texture)
+                bbox_ratio * 0.20         # Bounding box (spatial coherence)
             )
 
             # Safety clamp
@@ -232,8 +233,9 @@ class LeafDetector:
             if np.isnan(score) or np.isinf(score):
                 score = 0.5
 
-            # Calibrated threshold: typical leaves score 0.5-0.9
-            is_leaf = score >= self.threshold
+            # Adaptive threshold: 0.4 for heuristic (sensitive), 0.7 for model (strict)
+            threshold = 0.4 if self.model is None else self.threshold
+            is_leaf = score >= threshold
             method = 'heuristic'
 
             if is_leaf:
@@ -263,7 +265,7 @@ class LeafDetector:
             g = arr[:, :, 1].astype(np.float32)
             b = arr[:, :, 2].astype(np.float32)
 
-            # Green dominance
+            # Green dominance (primary signal)
             green_dominance = np.mean(g > np.maximum(r, b)).astype(np.float32)
             if np.isnan(green_dominance) or np.isinf(green_dominance):
                 green_dominance = 0.0
@@ -273,16 +275,26 @@ class LeafDetector:
             if np.isnan(moderate_green) or np.isinf(moderate_green):
                 moderate_green = 0.0
 
-            score = (green_dominance * 0.6 + moderate_green * 0.4)
+            # Check for green on colored background (yellow spots = disease)
+            yellow_mask = (g > r) & (r > b)
+            yellow_ratio = np.mean(yellow_mask.astype(np.float32))
+
+            score = (
+                green_dominance * 0.50 +
+                moderate_green * 0.35 +
+                yellow_ratio * 0.15  # Diseased leaves have yellow spots
+            )
             score = float(np.clip(score, 0.0, 1.0))
 
-            is_leaf = score >= self.threshold
+            # Use adaptive threshold
+            threshold = 0.4
+            is_leaf = score >= threshold
 
             return {
                 'is_leaf': bool(is_leaf),
                 'confidence': float(round(score, 4)),
                 'method': 'rgb_fallback',
-                'message': f'Leaf detection (RGB analysis): {score:.2f}'
+                'message': 'Leaf detected with RGB fallback analysis.' if is_leaf else f'Unclear leaf status (confidence: {score:.2f}). Please upload a clearer image.'
             }
         except Exception as e:
             logger.error(f"[LeafDetector] RGB fallback failed: {e}")

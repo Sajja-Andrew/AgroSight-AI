@@ -33,8 +33,8 @@ flask-compress>=1.14
 # ── Scheduling ──
 apscheduler>=3.10.1
 
-# ── AI / ML — CPU-Only ──
-tensorflow-cpu==2.16.1
+# ── AI / ML — CPU-Only (Python 3.11 compatible) ──
+tensorflow-cpu==2.14.0
 numpy==1.24.3
 pillow==10.1.0
 scikit-learn>=1.3.0
