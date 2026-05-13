@@ -1,0 +1,184 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - AgroSight AI</title>
+    <meta name="description" content="Sign in to your AgroSight AI account to access AI-powered crop disease detection.">
+    <meta name="color-scheme" content="light dark">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1><i class="fas fa-leaf"></i> AgroSight AI</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="index.html#categories">Categories</a></li>
+                <li><a href="signup.html" class="btn-signup">Sign Up</a></li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="auth-wrapper">
+        <!-- Left Panel - Branding -->
+        <div class="brand-panel">
+            <div class="auth-card1">
+                <div class="brand-content">
+                    <div class="logo-container">
+                        <div class="logo-icon">
+                         <i class="fas fa-leaf"></i>
+                        </div>
+                        <h1 class="logo-text">AgroSight AI</h1>
+                    </div>
+
+                    <p class="brand-tagline">Welcome back to the future of farming</p>
+
+                    <div class="features-list">
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="feature-text">
+                                <h4>Real-time Analytics</h4>
+                                <p>Monitor your crops 24/7</p>
+                            </div>
+                        </div>
+
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-cloud-sun"></i>
+                            </div>
+                            <div class="feature-text">
+                                <h4>Weather Insights</h4>
+                                <p>AI-powered predictions</p>
+                            </div>
+                        </div>
+
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-seedling"></i>
+                            </div>
+                            <div class="feature-text">
+                                <h4>Crop Management</h4>
+                                <p>Smart recommendations</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="floating-elements">
+                <div class="float-icon float-1"><i class="fas fa-sun"></i></div>
+                <div class="float-icon float-2"><i class="fas fa-cloud"></i></div>
+                <div class="float-icon float-3"><i class="fas fa-water"></i></div>
+            </div>
+        </div>
+
+        <section class="auth-section">
+            <div class="container">
+                <div class="auth-container">
+                    <div class="auth-card">
+                        <div class="auth-header">
+                            <div class="auth-icon">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                            <h2>Welcome Back</h2>
+                            <p>Sign in to access your dashboard</p>
+                        </div>
+
+                        <form id="signinForm" class="auth-form">
+                            <div class="form-group">
+                                <label for="loginIdentifier">Email or Phone Number</label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-envelope"></i>
+                                    <input type="text" id="loginIdentifier" name="loginIdentifier" placeholder="email@example.com or +1234567890" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="password">Password</label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-lock"></i>
+                                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                                    <button type="button" class="password-toggle" id="togglePassword" aria-label="Toggle password visibility">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="auth-options">
+                                <div class="remember-me">
+                                    <input type="checkbox" id="rememberMe">
+                                    <label for="rememberMe">Remember me</label>
+                                </div>
+                                <a href="#" class="forgot-password-link" id="forgotPasswordLink">Forgot Password?</a>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-block" id="signinBtn">
+                                <span class="btn-text">Sign In</span>
+                                <span class="btn-loader" style="display: none;">
+                                    <i class="fas fa-circle-notch fa-spin"></i> Signing in...
+                                </span>
+                            </button>
+
+                            <div class="auth-divider">
+                                <span>or</span>
+                            </div>
+
+                            <div class="social-login">
+                                <button type="button" class="social-btn" title="Sign in with Google">
+                                    <i class="fab fa-google"></i>
+                                </button>
+                                <button type="button" class="social-btn" title="Sign in with Facebook">
+                                    <i class="fab fa-facebook-f"></i>
+                                </button>
+                                <button type="button" class="social-btn" title="Sign in with WhatsApp">
+                                    <i class="fab fa-whatsapp"></i>
+                                </button>
+                            </div>
+
+                            <div class="auth-footer">
+                                <p>Don't have an account? <a href="signup.html">Create one now</a></p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- WhatsApp Support Modal -->
+    <div class="whatsapp-support-modal" id="whatsappSupportModal">
+        <div class="whatsapp-support-content">
+            <button class="close-modal" id="closeModal">&times;</button>
+            <div class="modal-icon">
+                <i class="fab fa-whatsapp"></i>
+            </div>
+            <h3>Need Help with Password?</h3>
+            <p>Contact our support team via WhatsApp for password reset assistance:</p>
+            <div class="whatsapp-number">+256 (0) 781 503 74</div>
+            <p class="modal-subtitle">Our team is available to help you regain access to your account.</p>
+            <a href="https://wa.me/25678150374" class="whatsapp-btn" target="_blank">
+                <i class="fab fa-whatsapp"></i> Message on WhatsApp
+            </a>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

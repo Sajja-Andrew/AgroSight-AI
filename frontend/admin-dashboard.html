@@ -1,0 +1,295 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - AgroSight AI</title>
+    <meta name="color-scheme" content="dark">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <!-- Mobile Toggle Button -->
+    <button class="toggle-sidebar" id="toggleSidebarBtn">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-shield-alt"></i> Admin</h2>
+            <p>AgroSight AI Panel</p>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="#" class="active" data-section="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="#" data-section="users"><i class="fas fa-users"></i> All Users</a></li>
+                <li><a href="#" data-section="farmers"><i class="fas fa-tractor"></i> Farmers</a></li>
+                <li><a href="#" data-section="agrovets"><i class="fas fa-user-md"></i> Agro-Vets</a></li>
+                <li><a href="#" data-section="activity"><i class="fas fa-history"></i> Activity Log</a></li>
+                <li class="sidebar-logout">
+                    <a href="index.html"><i class="fas fa-home"></i> Back to Home</a>
+                </li>
+                <li class="sidebar-logout">
+                    <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <h1><i class="fas fa-tachometer-alt"></i> <span id="pageTitle">Dashboard Overview</span></h1>
+            <div class="admin-info">
+                <div class="admin-avatar" id="adminAvatar" title="Click to view settings">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div class="admin-details">
+                    <strong id="adminName">Administrator</strong>
+                    <small>System Admin</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card farmers">
+                <i class="fas fa-tractor"></i>
+                <div class="stat-info">
+                    <h3 id="totalFarmers">0</h3>
+                    <p>Total Farmers</p>
+                </div>
+            </div>
+            <div class="stat-card agrovets">
+                <i class="fas fa-user-md"></i>
+                <div class="stat-info">
+                    <h3 id="totalAgrovets">0</h3>
+                    <p>Total Agro-Vets</p>
+                </div>
+            </div>
+            <div class="stat-card diagnoses">
+                <i class="fas fa-leaf"></i>
+                <div class="stat-info">
+                    <h3 id="totalDiagnoses">0</h3>
+                    <p>Total Diagnoses</p>
+                </div>
+            </div>
+            <div class="stat-card messages">
+                <i class="fas fa-comments"></i>
+                <div class="stat-info">
+                    <h3 id="totalMessages">0</h3>
+                    <p>Total Messages</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard-section" class="section-container">
+            <div class="section-header">
+                <h2><i class="fas fa-chart-line"></i> Recent Activity</h2>
+            </div>
+            <div class="section-body" id="recentActivity"></div>
+        </section>
+
+        <!-- Users Section -->
+        <section id="users-section" class="section-container hidden">
+            <div class="section-header">
+                <h2><i class="fas fa-users"></i> All Users</h2>
+                <button class="btn btn-primary" onclick="exportUsers()">
+                    <i class="fas fa-download"></i> Export CSV
+                </button>
+            </div>
+            <div class="section-body">
+                <div class="search-bar">
+                    <input type="text" id="searchUsers" placeholder="Search by name, email, or phone...">
+                    <select id="filterRole">
+                        <option value="">All Roles</option>
+                        <option value="farmer">Farmers</option>
+                        <option value="agrovet">Agro-Vets</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="searchUsers()">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Role</th>
+                                <th>Location</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Farmers Section -->
+        <section id="farmers-section" class="section-container hidden">
+            <div class="section-header">
+                <h2><i class="fas fa-tractor"></i> Farmers</h2>
+            </div>
+            <div class="section-body">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Location</th>
+                                <th>Diagnoses</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="farmersTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Agro-Vets Section -->
+        <section id="agrovets-section" class="section-container hidden">
+            <div class="section-header">
+                <h2><i class="fas fa-user-md"></i> Agro-Vets</h2>
+            </div>
+            <div class="section-body">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Location</th>
+                                <th>Clients Helped</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="agrovetsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Activity Log Section -->
+        <section id="activity-section" class="section-container hidden">
+            <div class="section-header">
+                <h2><i class="fas fa-history"></i> Activity Log</h2>
+            </div>
+            <div class="section-body" id="activityLog"></div>
+        </section>
+    </main>
+
+    <!-- Admin Password Reset Required Modal (First-time login) -->
+    <div class="modal" id="passwordResetModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Security Notice</h3>
+            </div>
+            <p style="padding: 0 20px; color: var(--text-secondary);">You must change your password before continuing.</p>
+            <form id="passwordResetForm" onsubmit="event.preventDefault(); submitPasswordReset();">
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" id="resetNewPassword" required minlength="8" placeholder="Minimum 8 characters">
+                </div>
+                <div class="form-group">
+                    <label>Confirm New Password</label>
+                    <input type="password" id="resetConfirmPassword" required minlength="8" placeholder="Confirm password">
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Change Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Reset User Password Modal -->
+    <div class="modal" id="resetPasswordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-key"></i> Reset User Password</h3>
+            </div>
+            <div class="form-group">
+                <label>User ID</label>
+                <input type="text" id="resetUserId" readonly>
+            </div>
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="resetUserName" readonly>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="text" id="resetUserEmail" readonly>
+            </div>
+            <div class="form-group">
+                <label>Temporary Password (auto-generated)</label>
+                <input type="text" id="generatedPassword" readonly style="font-family: monospace; background: var(--bg-secondary);">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-danger" onclick="closeResetPasswordModal()">Cancel</button>
+                <button type="button" class="btn btn-warning" onclick="confirmResetPassword()">
+                    <i class="fas fa-key"></i> Generate Reset
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Details Modal -->
+    <div class="modal" id="userModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user"></i> User Details</h3>
+            </div>
+            <div id="userDetails"></div>
+            <div class="modal-actions">
+                <button class="btn btn-danger" onclick="closeUserModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Settings Modal (Hidden from login menu) -->
+    <div class="modal" id="adminSettingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-cog"></i> Admin Settings</h3>
+            </div>
+            <form id="adminSettingsForm">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Admin Name</label>
+                    <input type="text" id="newAdminName" required placeholder="Enter new admin name">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-key"></i> New Password</label>
+                    <input type="password" id="newAdminPassword" minlength="8" placeholder="Leave blank to keep current">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-check-circle"></i> Confirm New Password</label>
+                    <input type="password" id="confirmAdminPassword" placeholder="Confirm new password">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-danger" onclick="closeAdminSettings()">Cancel</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

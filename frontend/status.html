@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Status - AgroSight AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .status-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .status-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .status-header i {
+            font-size: 60px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        .status-header h1 {
+            color: #333;
+            font-size: 24px;
+        }
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        .status-item .label {
+            font-weight: 500;
+            color: #555;
+        }
+        .status-item .value {
+            font-weight: 600;
+        }
+        .status-item .value.success { color: #4caf50; }
+        .status-item .value.warning { color: #ff9800; }
+        .status-item .value.error { color: #f44336; }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.5s ease;
+        }
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: 600;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        .btn a {
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="status-card">
+        <div class="status-header">
+            <i class="fas fa-leaf"></i>
+            <h1>AgroSight AI System Status</h1>
+        </div>
+        
+        <div id="statusContainer">
+            <div class="status-item">
+                <span class="label">API Server</span>
+                <span class="value" id="apiStatus">Checking...</span>
+            </div>
+            <div class="status-item">
+                <span class="label">AI Model</span>
+                <span class="value" id="modelStatus">Checking...</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Training Progress</span>
+                <span class="value" id="trainingProgress">-</span>
+            </div>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+        
+        <button class="btn" onclick="refreshStatus()">
+            <i class="fas fa-sync"></i> Refresh Status
+        </button>
+        
+        <button class="btn" style="background: #4caf50;">
+            <a href="signin.html">Go to Dashboard</a>
+        </button>
+        <button class="btn" style="background: #667eea; margin-top: 10px;">
+            <a href="index.html">Back to Home</a>
+        </button>
+    </div>
+    
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        const API_URL = window.API_CONFIG ? window.API_CONFIG.BASE_URL : 'http://127.0.0.1:5000/api';
+        
+        async function checkStatus() {
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                const data = await response.json();
+                
+                document.getElementById('apiStatus').textContent = '✅ Online';
+                document.getElementById('apiStatus').className = 'value success';
+                
+                if (data.model_loaded) {
+                    document.getElementById('modelStatus').textContent = '✅ Ready';
+                    document.getElementById('modelStatus').className = 'value success';
+                    document.getElementById('trainingProgress').textContent = 'Completed!';
+                    document.getElementById('progressFill').style.width = '100%';
+                } else {
+                    document.getElementById('modelStatus').textContent = '⏳ Training';
+                    document.getElementById('modelStatus').className = 'value warning';
+                    
+                    // Check training status
+                    checkTrainingStatus();
+                }
+                
+            } catch (error) {
+                document.getElementById('apiStatus').textContent = '❌ Offline';
+                document.getElementById('apiStatus').className = 'value error';
+                document.getElementById('modelStatus').textContent = '❌ Unavailable';
+                document.getElementById('modelStatus').className = 'value error';
+            }
+        }
+        
+        async function checkTrainingStatus() {
+            try {
+                const response = await fetch(`${API_URL}/model-status`);
+                const data = await response.json();
+                
+                if (data.training_status) {
+                    const status = data.training_status;
+                    
+                    if (status.progress) {
+                        document.getElementById('trainingProgress').textContent = 
+                            `${status.progress.toFixed(1)}%`;
+                        document.getElementById('progressFill').style.width = 
+                            `${status.progress}%`;
+                    }
+                    
+                    if (status.epoch && status.total_epochs) {
+                        document.getElementById('trainingProgress').textContent = 
+                            `Epoch ${status.epoch}/${status.total_epochs}`;
+                    }
+                }
+            } catch (error) {
+                console.error('Training status error:', error);
+            }
+        }
+        
+        function refreshStatus() {
+            location.reload();
+        }
+        
+        // Check status on load
+        checkStatus();
+        
+        // Refresh every 30 seconds
+        setInterval(checkStatus, 30000);
+    </script>
+</body>
+</html>

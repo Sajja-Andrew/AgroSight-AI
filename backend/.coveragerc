@@ -1,0 +1,27 @@
+[run]
+source = .
+omit =
+    tests/*
+    pipeline/tests/*
+    */__init__.py
+    venv/*
+    venv311/*
+    venv_python314_broken/*
+    legacy/*
+    model/app_old.py
+    model/predict.py
+    model/model.py
+    model/train.py
+    model/train_improved.py
+    model/train_leaf_detector.py
+    pipeline_runner.py
+    retrain_from_feedback.py
+    run_tests.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise AssertionError
+    raise NotImplementedError
+    if __name__ == .__main__.:

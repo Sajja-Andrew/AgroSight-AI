@@ -1,0 +1,11 @@
+[
+  {
+    "id": "20260502_191300_0e4ab7e5",
+    "timestamp": "2026-05-02T19:13:00.601296",
+    "predicted_class": "Corn_(maize)___Northern_Leaf_Blight",
+    "correct_class": "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
+    "confidence": 65.29,
+    "file_path": "feedback\\Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot\\20260502_191300_0e4ab7e5.jpg",
+    "status": "stored"
+  }
+]

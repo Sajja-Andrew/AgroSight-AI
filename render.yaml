@@ -1,0 +1,52 @@
+services:
+  - type: web
+    name: AgroSightAI-api
+    runtime: python
+    plan: starter
+    buildCommand: |
+      pip install -r backend/requirements.txt gunicorn
+    startCommand: |
+      cd backend && gunicorn -w 2 -b 0.0.0.0:$PORT app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: AgroSightAI-db
+          property: connectionString
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: LOG_LEVEL
+        value: INFO
+      - key: MODEL_PATH
+        value: /app/saved_models/best_model.keras
+      - key: CLASS_INDICES_PATH
+        value: /app/saved_models/class_indices.json
+      - key: DISEASE_INFO_PATH
+        value: /app/saved_models/disease_info.json
+      - key: LEAF_DETECTOR_PATH
+        value: /app/saved_models/leaf_detector.keras
+      - key: LEAF_DETECTOR_CONFIG
+        value: /app/saved_models/leaf_detector_config.json
+      - key: PYTORCH_MODEL_DIR
+        value: /app/saved_models_pytorch
+      - key: UPLOAD_FOLDER
+        value: /app/backend/uploads
+      - key: MAX_CONTENT_LENGTH
+        value: "16777216"
+      - key: MINIO_ENABLED
+        value: "false"
+      - key: REDIS_ENABLED
+        value: "false"
+      - key: ENABLE_AI_CHAT
+        value: "false"
+
+databases:
+  - name: AgroSightAI-db
+    plan: free
+    databaseName: AgroSightAI
+    user: AgroSightAI

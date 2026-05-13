@@ -1,0 +1,66 @@
+# ═══════════════════════════════════════════════════════════════
+# AgroSight AI — Prometheus Configuration
+# ═══════════════════════════════════════════════════════════════
+# Scrape targets for production monitoring.
+# ═══════════════════════════════════════════════════════════════
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: agrosight-prod
+    replica: '{{.ExternalURL}}'
+
+# Alertmanager (optional — uncomment when configured)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ['alertmanager:9093']
+
+# Rule files (optional — create rules/ directory)
+# rule_files:
+#   - /etc/prometheus/rules/*.yml
+
+scrape_configs:
+  # ── Prometheus Self-Monitoring ──
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # ── Node Exporter (Host Metrics) ──
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  # ── Docker Daemon Metrics (requires docker daemon config) ──
+  # - job_name: 'docker'
+  #   static_configs:
+  #     - targets: ['host.docker.internal:9323']
+
+  # ── Flask Application Metrics ──
+  # If Flask exposes /metrics via prometheus_client:
+  - job_name: 'agrosight-api'
+    metrics_path: '/api/metrics'
+    static_configs:
+      - targets: ['app:8080']
+    scrape_interval: 30s
+
+  # ── PostgreSQL Exporter ──
+  # Requires pg_exporter sidecar or separate container:
+  # - job_name: 'postgres-exporter'
+  #   static_configs:
+  #     - targets: ['postgres-exporter:9187']
+
+  # ── Redis Exporter ──
+  # Requires redis_exporter sidecar:
+  # - job_name: 'redis-exporter'
+  #   static_configs:
+  #     - targets: ['redis-exporter:9121']
+
+  # ── MinIO Metrics ──
+  - job_name: 'minio'
+    metrics_path: /minio/v2/metrics/cluster
+    scheme: http
+    static_configs:
+      - targets: ['minio:9000']
+    bearer_token: '${MINIO_ACCESS_KEY}'

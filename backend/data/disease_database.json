@@ -1,0 +1,121 @@
+{
+  "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot": {
+    "name": "Corn Cercospora Leaf Spot / Gray Leaf Spot",
+    "symptoms": "Small tan to brown spots on lower leaves that expand into rectangular gray lesions with yellow halos. Lesions run parallel to leaf veins and can merge, causing large dead areas.",
+    "solution": "Apply fungicides containing azoxystrobin, pyraclostrobin, or chlorothalonil. Rotate crops and till under infected residue.",
+    "prevention": "Plant resistant hybrids, rotate crops with non-host plants, ensure proper row spacing for airflow, avoid overhead irrigation.",
+    "severity": "High"
+  },
+  "Corn_(maize)___Common_rust_": {
+    "name": "Corn Common Rust",
+    "symptoms": "Small reddish-brown pustules (uredinia) scattered on upper and lower leaf surfaces. Pustules contain rusty powdery spores. Severe infection causes leaves to yellow and die prematurely.",
+    "solution": "Apply fungicides containing mancozeb, azoxystrobin, or propiconazole. Begin applications before tasseling if rust is present.",
+    "prevention": "Plant rust-resistant hybrids, rotate crops, scout fields regularly for early signs, maintain balanced fertility.",
+    "severity": "Medium"
+  },
+  "Corn_(maize)___Northern_Leaf_Blight": {
+    "name": "Corn Northern Leaf Blight",
+    "symptoms": "Long, elliptical, grayish-green to tan lesions running parallel to leaf veins. Lesions can be 1-6 inches long. Severe infection causes large dead areas on leaves.",
+    "solution": "Apply fungicides containing pyraclostrobin, azoxystrobin, or chlorothalonil. Remove and destroy severely infected crop residue.",
+    "prevention": "Plant resistant hybrids, rotate crops with soybeans or small grains, avoid continuous corn, maintain good field sanitation.",
+    "severity": "High"
+  },
+  "Corn_(maize)___healthy": {
+    "name": "Healthy Corn (Maize)",
+    "symptoms": "No disease detected. Plant has normal green leaves with no lesions, spots, or discoloration.",
+    "solution": "Continue good agricultural practices. Monitor regularly for early signs of disease.",
+    "prevention": "Maintain proper fertilization, adequate irrigation, good weed control, and regular scouting.",
+    "severity": "None"
+  },
+  "Potato___Early_blight": {
+    "name": "Potato Early Blight",
+    "symptoms": "Dark brown spots with concentric rings on leaves, premature defoliation",
+    "solution": "Apply fungicide containing chlorothalonil or mancozeb. Remove infected leaves.",
+    "prevention": "Crop rotation, maintain plant vigor with proper fertilization, remove plant debris.",
+    "severity": "Medium"
+  },
+  "Potato___Late_blight": {
+    "name": "Potato Late Blight",
+    "symptoms": "Water-soaked lesions on leaves, white fungal growth on leaf undersides, tuber rot",
+    "solution": "Apply fungicides (mancozeb, chlorothalonil). Remove infected tubers. Harvest early if severe.",
+    "prevention": "Use resistant varieties, proper hilling, destroy culls and volunteers.",
+    "severity": "High"
+  },
+  "Potato___healthy": {
+    "name": "Healthy Potato",
+    "symptoms": "No disease detected - plant appears healthy",
+    "solution": "Continue good agricultural practices. Monitor for early signs of disease.",
+    "prevention": "Maintain regular monitoring, proper fertilization and watering.",
+    "severity": "None"
+  },
+  "Tomato___Bacterial_spot": {
+    "name": "Tomato Bacterial Spot",
+    "symptoms": "Small water-soaked spots on leaves and fruits, spots turn brown with yellow halos",
+    "solution": "Apply copper bactericide. Remove infected plant material. Avoid working with wet plants.",
+    "prevention": "Use certified disease-free seeds, avoid overhead irrigation, crop rotation.",
+    "severity": "Medium"
+  },
+  "Tomato___Early_blight": {
+    "name": "Tomato Early Blight",
+    "symptoms": "Dark brown spots with concentric rings (bull's eye pattern), yellowing of lower leaves",
+    "solution": "Apply fungicides containing chlorothalonil or mancozeb. Remove infected lower leaves. Improve air circulation.",
+    "prevention": "Crop rotation, proper plant spacing, avoid wetting foliage, mulch around plants.",
+    "severity": "Medium"
+  },
+  "Tomato___Late_blight": {
+    "name": "Tomato Late Blight",
+    "symptoms": "Water-soaked lesions on leaves, white mold on leaf undersides, brown patches",
+    "solution": "Apply copper fungicide or chlorothalonil immediately. Remove and destroy infected plants. Ensure good air circulation.",
+    "prevention": "Use resistant varieties, avoid overhead watering, rotate crops, ensure proper spacing.",
+    "severity": "High"
+  },
+  "Tomato___Leaf_Mold": {
+    "name": "Tomato Leaf Mold",
+    "symptoms": "Yellow patches on upper leaf surface, olive-green to gray mold on underside",
+    "solution": "Improve ventilation and reduce humidity. Apply fungicide containing mancozeb or copper.",
+    "prevention": "Use resistant varieties, maintain proper spacing, avoid overhead irrigation.",
+    "severity": "Medium"
+  },
+  "Tomato___Septoria_leaf_spot": {
+    "name": "Tomato Septoria Leaf Spot",
+    "symptoms": "Small circular spots with dark borders and light gray centers, black dots in center",
+    "solution": "Remove infected leaves immediately. Apply copper-based fungicide or chlorothalonil.",
+    "prevention": "Use clean seeds, crop rotation, remove plant debris, avoid wetting leaves.",
+    "severity": "Medium"
+  },
+  "Tomato___Spider_mites Two-spotted_spider_mite": {
+    "name": "Tomato Spider Mites",
+    "symptoms": "Yellow stippling on leaves, fine webbing on plant, leaves turn yellow and dry",
+    "solution": "Apply insecticidal soap or neem oil. Introduce predatory mites. Increase humidity.",
+    "prevention": "Maintain adequate humidity, remove weeds, regular monitoring.",
+    "severity": "Medium"
+  },
+  "Tomato___Target_Spot": {
+    "name": "Tomato Target Spot",
+    "symptoms": "Circular lesions with concentric rings on leaves and fruits, yellow halos",
+    "solution": "Apply fungicide containing chlorothalonil or mancozeb. Remove infected plant material.",
+    "prevention": "Use disease-free seeds, proper plant spacing, avoid overhead irrigation.",
+    "severity": "Medium"
+  },
+  "Tomato___Tomato_Yellow_Leaf_Curl_Virus": {
+    "name": "Tomato Yellow Leaf Curl Virus",
+    "symptoms": "Yellowing and curling of leaves upward, stunted growth, reduced fruit production",
+    "solution": "Remove and destroy infected plants immediately. Control whitefly population with insecticides.",
+    "prevention": "Use resistant varieties, control whiteflies with yellow sticky traps, reflective mulches.",
+    "severity": "High"
+  },
+  "Tomato___Tomato_mosaic_virus": {
+    "name": "Tomato Mosaic Virus",
+    "symptoms": "Mottled yellow and green patterns on leaves, leaf curling, stunted growth",
+    "solution": "No cure available. Remove and destroy infected plants. Disinfect tools.",
+    "prevention": "Use virus-free seeds, control aphids, avoid tobacco contact, wash hands before handling plants.",
+    "severity": "High"
+  },
+  "Tomato___healthy": {
+    "name": "Healthy Tomato",
+    "symptoms": "No disease detected - plant appears healthy with green leaves",
+    "solution": "Continue good agricultural practices. Regular monitoring recommended.",
+    "prevention": "Maintain proper watering, fertilization, and pest management practices.",
+    "severity": "None"
+  }
+}

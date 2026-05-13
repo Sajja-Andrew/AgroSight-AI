@@ -1,0 +1,337 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroSight AI - AI-Powered Crop Disease Detection</title>
+    <meta name="description" content="Protect your crops with AI-powered disease detection. Upload a photo and get instant diagnoses and solutions.">
+    <meta name="color-scheme" content="light dark">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1><i class="fas fa-leaf"></i> AgroSight AI</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="#categories">Categories</a></li>
+                <li><a href="#farming-tools">Features</a></li>
+                <li><a href="#insect-sides">Pests</a></li>
+                <li><a href="signin.html">Sign In</a></li>
+                <li><a href="signup.html" class="btn-signup">Get Started</a></li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-bg-shapes">
+            <div class="hero-shape hero-shape-1"></div>
+            <div class="hero-shape hero-shape-2"></div>
+            <div class="hero-shape hero-shape-3"></div>
+        </div>
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <i class="fas fa-bolt"></i> AI-Powered Technology
+                </div>
+                <h1>Protect Your Crops with <span class="highlight">AI-Powered</span> Disease Detection</h1>
+                <p>Upload a photo of your plant's leaf or stem, and our AI instantly identifies diseases and provides solutions. Connect with expert Agro-Vets for personalized advice.</p>
+                <div class="hero-buttons">
+                    <a href="signup.html" class="btn btn-primary">
+                        Get Started Free <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <a href="#categories" class="btn btn-outline">
+                        <i class="fas fa-search"></i> Explore Categories
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <strong>10K+</strong>
+                        <span>Farmers Helped</span>
+                    </div>
+                    <div class="hero-stat-divider"></div>
+                    <div class="hero-stat">
+                        <strong>95%</strong>
+                        <span>Detection Accuracy</span>
+                    </div>
+                    <div class="hero-stat-divider"></div>
+                    <div class="hero-stat">
+                        <strong>50+</strong>
+                        <span>Crop Diseases</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="hero-image-card">
+                    <div class="hero-icon-display">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <div class="hero-scan-line"></div>
+                    <div class="hero-mini-stat">
+                        <i class="fas fa-check-circle" style="color: var(--success-color);"></i>
+                        <span>Disease Detected: Bean Rust</span>
+                    </div>
+                    <div class="hero-mini-stat">
+                        <i class="fas fa-percentage" style="color: var(--primary-color);"></i>
+                        <span>Confidence: 96.5%</span>
+                    </div>
+                    <div class="hero-mini-stat">
+                        <i class="fas fa-prescription-bottle-alt" style="color: var(--secondary-color);"></i>
+                        <span>Treatment: Apply fungicide</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section id="categories" class="categories">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Crop Categories</span>
+                <h2 class="section-title">Common Crop Diseases</h2>
+                <p class="section-subtitle">Explore diseases affecting different crop types and learn how to manage them</p>
+            </div>
+
+            <div class="category-grid">
+                <div class="category-card">
+                    <div class="category-icon">
+                        <i class="fas fa-seedling"></i>
+                    </div>
+                    <h3>Legumes</h3>
+                    <p>Beans, peas, groundnuts, soybeans and more</p>
+                    <div class="disease-list">
+                        <h4>Common Diseases:</h4>
+                        <ul>
+                            <li><strong>Bean Rust:</strong> Reddish-brown pustules on leaves</li>
+                            <li><strong>Powdery Mildew:</strong> White powdery spots on leaves</li>
+                            <li><strong>Root Rot:</strong> Wilting and yellowing of plants</li>
+                        </ul>
+                        <div class="solution">
+                            <i class="fas fa-lightbulb"></i> Apply fungicides, crop rotation, plant resistant varieties
+                        </div>
+                    </div>
+                </div>
+
+                <div class="category-card">
+                    <div class="category-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <h3>Cash Crops</h3>
+                    <p>Coffee, tea, cotton, sugarcane, tobacco</p>
+                    <div class="disease-list">
+                        <h4>Common Diseases:</h4>
+                        <ul>
+                            <li><strong>Coffee Leaf Rust:</strong> Orange-yellow spots on leaves</li>
+                            <li><strong>Cotton Wilt:</strong> Sudden wilting and browning</li>
+                            <li><strong>Sugarcane Smut:</strong> Black whip-like growths</li>
+                        </ul>
+                        <div class="solution">
+                            <i class="fas fa-lightbulb"></i> Remove infected plants, apply appropriate pesticides
+                        </div>
+                    </div>
+                </div>
+
+                <div class="category-card">
+                    <div class="category-icon">
+                        <i class="fas fa-apple-alt"></i>
+                    </div>
+                    <h3>Other Crops</h3>
+                    <p>Maize, rice, vegetables, fruits, cereals</p>
+                    <div class="disease-list">
+                        <h4>Common Diseases:</h4>
+                        <ul>
+                            <li><strong>Maize Lethal Necrosis:</strong> Yellowing and stunting</li>
+                            <li><strong>Rice Blast:</strong> Diamond-shaped lesions on leaves</li>
+                            <li><strong>Late Blight:</strong> Dark spots on leaves and fruits</li>
+                        </ul>
+                        <div class="solution">
+                            <i class="fas fa-lightbulb"></i> Use certified seeds, proper spacing, balanced fertilization
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="farming-tools" class="features">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Features</span>
+                <h2 class="section-title">Smart Farming Tools</h2>
+                <p class="section-subtitle">Empowering farmers with cutting-edge technology</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon-wrap">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <h3>AI Disease Detection</h3>
+                    <p>Upload or take a photo of affected plant parts for instant disease identification and solutions</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon-wrap">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3>Connect with Agro-Vets</h3>
+                    <p>Direct communication with agricultural experts via text, audio, and image sharing</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon-wrap">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h3>Nearby Agro-Vets</h3>
+                    <p>Find agricultural experts in your area for personalized assistance</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon-wrap">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Activity Dashboard</h3>
+                    <p>Track your crop health history, diagnoses, and consultations</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Insect Pests Section -->
+    <section id="insect-sides" class="insects">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Pest Management</span>
+                <h2 class="section-title">Common Insect Pests</h2>
+                <p class="section-subtitle">Identify and manage crop pests effectively</p>
+            </div>
+
+            <div class="insect-grid">
+                <div class="insect-card">
+                    <div class="insect-icon-wrap">
+                        <i class="fas fa-bug"></i>
+                    </div>
+                    <h3>Fall Armyworm</h3>
+                    <p>Affects maize and other cereals. Look for leaf damage and larvae presence.</p>
+                    <span class="control"><i class="fas fa-shield-alt"></i> Control: Neem extract, early planting, biological control</span>
+                </div>
+                <div class="insect-card">
+                    <div class="insect-icon-wrap">
+                        <i class="fas fa-spider"></i>
+                    </div>
+                    <h3>Spider Mites</h3>
+                    <p>Tiny pests causing stippling on leaves. Common in dry conditions.</p>
+                    <span class="control"><i class="fas fa-shield-alt"></i> Control: Miticides, predatory mites, maintain humidity</span>
+                </div>
+                <div class="insect-card">
+                    <div class="insect-icon-wrap">
+                        <i class="fas fa-locust"></i>
+                    </div>
+                    <h3>Locusts</h3>
+                    <p>Swarming pests that devastate crops rapidly.</p>
+                    <span class="control"><i class="fas fa-shield-alt"></i> Control: Early warning systems, chemical control, biopesticides</span>
+                </div>
+                <div class="insect-card">
+                    <div class="insect-icon-wrap">
+                        <i class="fas fa-beetle"></i>
+                    </div>
+                    <h3>Bean Beetles</h3>
+                    <p>Feed on leaves of legumes, causing skeletonization.</p>
+                    <span class="control"><i class="fas fa-shield-alt"></i> Control: Insecticidal soap, neem oil, row covers</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Protect Your Crops?</h2>
+                <p>Join thousands of farmers who use AgroSight AI to detect and manage crop diseases instantly.</p>
+                <div class="cta-buttons">
+                    <a href="signup.html" class="btn btn-primary btn-lg">
+                        Create Free Account <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <a href="signin.html" class="btn btn-outline-light btn-lg">
+                        Sign In <i class="fas fa-sign-in-alt"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="admin-access">
+        <p>
+            <i class="fas fa-shield-alt"></i>
+            Administrator?
+            <a href="admin-login.html">
+                Access Admin Panel
+            </a>
+        </p>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3><i class="fas fa-leaf"></i> AgroSight AI</h3>
+                    <p>Empowering farmers with AI-powered crop disease detection and expert agricultural support.</p>
+                    <div class="social-links">
+                        <a href="#" aria-label="Facebook" onclick="event.preventDefault(); showToast('Coming soon', 'info');"><i class="fab fa-facebook"></i></a>
+                        <a href="#" aria-label="Twitter" onclick="event.preventDefault(); showToast('Coming soon', 'info');"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="WhatsApp" onclick="event.preventDefault(); showToast('Coming soon', 'info');"><i class="fab fa-whatsapp"></i></a>
+                        <a href="#" aria-label="YouTube" onclick="event.preventDefault(); showToast('Coming soon', 'info');"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="index.html#categories">Categories</a></li>
+                        <li><a href="signin.html">Sign In</a></li>
+                        <li><a href="signup.html">Sign Up</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#" onclick="event.preventDefault(); showToast('Coming soon', 'info');">Help Center</a></li>
+                        <li><a href="#" onclick="event.preventDefault(); showToast('Coming soon', 'info');">Contact Us</a></li>
+                        <li><a href="#" onclick="event.preventDefault(); showToast('Coming soon', 'info');">FAQs</a></li>
+                        <li><a href="#" onclick="event.preventDefault(); showToast('Coming soon', 'info');">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <ul class="contact-list">
+                        <li><i class="fas fa-envelope"></i> support@AgrosightAI.ai</li>
+                        <li><i class="fas fa-phone"></i> +256 781 503 74</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Kampala, Uganda</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 AgroSight AI. All rights reserved. Built with <i class="fas fa-heart" style="color: var(--error-color);"></i> for farmers.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

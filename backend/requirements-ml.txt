@@ -1,0 +1,8 @@
+# AI / ML heavyweights — change rarely. Installed first for maximal layer caching.
+tensorflow-cpu==2.16.1
+numpy==1.24.3
+pillow==10.1.0
+scikit-learn==1.3.2
+matplotlib==3.8.2
+h5py==3.11.0
+scipy>=1.11.0

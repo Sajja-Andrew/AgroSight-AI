@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm start *)",
+      "Bash(python utils/dataset_prep.py --dataset_path \"../dataset\" --output_path \"../dataset/processed\")",
+      "PowerShell(cd \"D:\\\\Drive D\\\\desck\\\\CCS\\\\Project\\\\Agrosight AI_ai\\\\backend\"; $env:PYTHONIOENCODING=\"utf-8\"; python model/predict.py --model \"../saved_models/best_model_finetuned.keras\" --class_indices \"../saved_models/class_indices.json\" --image \"../dataset/processed/test/Corn_\\(maize\\)___Cercospora_leaf_spot Gray_leaf_spot/0657e6c0-5a6d-4ef3-807a-4e31e57fb683___RS_GLSp 7344 copy.jpg\")",
+      "Bash(curl *)",
+      "Bash(python app.py)",
+      "Bash(D:\\\\Drive D\\\\desck\\\\CCS\\\\Project\\\\Agrosight AI_ai\\\\backend\\\\venv311\\\\Scripts\\\\python.exe *)",
+      "PowerShell(Get-ChildItem \"D:\\\\Drive D\\\\desck\\\\CCS\\\\Project\\\\smart_crop_ai\\\\backend\" | ForEach-Object { $_.Name })",
+      "Bash(docker system df *)",
+      "Bash(Select-Object FullName)",
+      "Bash(Sort-Object FullName)",
+      "Bash(.migvenv/Scripts/pip install *)",
+      "Bash(FLASK_APP=backend/app.py .migvenv/Scripts/flask db init)",
+      "Bash(docker compose *)",
+      "Bash(docker pull *)",
+      "Bash(docker buildx *)",
+      "Bash(docker stats *)"
+    ]
+  }
+}

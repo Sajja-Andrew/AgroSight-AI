@@ -1,0 +1,5 @@
+{"event": "run_start", "run_id": "20260510_132828", "timestamp": "2026-05-10T13:28:28.077518"}
+{"event": "stage", "stage": "ingestion", "timestamp": "2026-05-10T13:28:28.131916", "details": {"count": 4}}
+{"event": "stage", "stage": "validation", "timestamp": "2026-05-10T13:28:28.135368", "details": {"raw_count": 4, "after_status_filter": 4, "after_duplicate_removal": 4, "after_class_validation": 1, "after_consistency_filter": 1, "quarantined_inconsistent": 0, "final_count": 1}}
+{"event": "feedback_distribution", "timestamp": "2026-05-10T13:28:28.135368", "distribution": {"Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot": 1}}
+{"event": "stage", "stage": "preprocessing", "timestamp": "2026-05-10T13:36:22.567658", "details": {"random_seed": 42, "train_split": 0.8, "total_samples": 25263, "train_count": 20210, "val_count": 5053, "num_classes": 17, "feedback_count": 1, "original_count": 25262}}

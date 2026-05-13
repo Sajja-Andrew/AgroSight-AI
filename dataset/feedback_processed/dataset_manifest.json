@@ -1,0 +1,10 @@
+{
+  "random_seed": 42,
+  "train_split": 0.8,
+  "total_samples": 25263,
+  "train_count": 20210,
+  "val_count": 5053,
+  "num_classes": 17,
+  "feedback_count": 1,
+  "original_count": 25262
+}

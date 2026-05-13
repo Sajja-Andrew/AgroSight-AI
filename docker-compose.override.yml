@@ -1,0 +1,38 @@
+# ═══════════════════════════════════════════════════════════════
+# Local Development Overrides (Auto-loaded by docker compose up)
+# ═══════════════════════════════════════════════════════════════
+# Use this file for hot-reload, debug mode, or local volume tweaks.
+# It is NOT loaded when you explicitly run:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# ═══════════════════════════════════════════════════════════════
+
+services:
+  api:
+    environment:
+      APP_ENV: development
+      LOG_LEVEL: DEBUG
+      DEBUG: "true"
+      # Point to local SQLite if Postgres isn't running
+      DATABASE_URL: ${DATABASE_URL:-sqlite:///app/backend/instance/AgroSightAI.db}
+    volumes:
+      # Hot-reload backend code during development
+      - ./backend:/app/backend:ro
+    ports:
+      - "5000:5000"
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+
+  chat:
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./frontend/server:/app:ro
+
+  web:
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./docker/nginx-minimal.conf:/etc/nginx/conf.d/default.conf:ro

@@ -1,0 +1,325 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Dashboard - AgroSight AI</title>
+    <meta name="color-scheme" content="light dark">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/farmer.css">
+    <link rel="stylesheet" href="css/disease-detection.css">
+</head>
+<body>
+    <!-- Mobile Header -->
+    <div class="mobile-header" id="mobileHeader">
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="mobile-brand">
+            <i class="fas fa-leaf"></i> AgroSight AI
+        </div>
+        <button class="mobile-theme-btn" id="mobileThemeToggle" aria-label="Toggle theme">
+            <i class="fas fa-moon" id="mobileThemeIcon"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar Overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-leaf"></i> AgroSight AI</h2>
+            <p>Farmer Panel</p>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li class="active" data-section="dashboard"><a href="#"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                <li data-section="disease-detection"><a href="#"><i class="fas fa-camera"></i> <span>Disease Detection</span></a></li>
+                <li data-section="messages"><a href="#"><i class="fas fa-comments"></i> <span>Messages</span></a></li>
+                <li data-section="agrovets"><a href="#"><i class="fas fa-user-md"></i> <span>Nearby Agro-Vets</span></a></li>
+                <li data-section="profile"><a href="#"><i class="fas fa-user"></i> <span>Profile</span></a></li>
+                <li data-section="history"><a href="#"><i class="fas fa-history"></i> <span>Activity History</span></a></li>
+                <li class="sidebar-divider"></li>
+                <li><a href="index.html"><i class="fas fa-home"></i> <span>Back to Home</span></a></li>
+                <li><a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="sidebar-user-info">
+                <div class="sidebar-avatar" id="sidebarAvatar">F</div>
+                <div class="sidebar-user-details">
+                    <span id="sidebarUserName">Farmer</span>
+                    <small>Farmer Account</small>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="welcome-message">
+                <p class="welcome-greeting" id="greetingText">Good morning</p>
+                <h2>Welcome back, <span id="userName">Farmer</span>!</h2>
+            </div>
+            <div class="top-bar-right">
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+                <div class="user-profile">
+                    <div class="profile-avatar" id="navAvatar">F</div>
+                    <div class="user-info">
+                        <span id="userDisplayName">Farmer</span>
+                        <small>Farmer</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="dashboard-section active-section">
+            <div class="section-header">
+                <h3><i class="fas fa-chart-line"></i> Dashboard Overview</h3>
+                <p>Your farming activity at a glance</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card stat-green">
+                    <div class="stat-icon-wrap">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalDetections">0</h3>
+                        <p>Total Detections</p>
+                    </div>
+                </div>
+                <div class="stat-card stat-blue">
+                    <div class="stat-icon-wrap">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalMessages">0</h3>
+                        <p>Messages Sent</p>
+                    </div>
+                </div>
+                <div class="stat-card stat-orange">
+                    <div class="stat-icon-wrap">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="nearbyAgrovets">6</h3>
+                        <p>Nearby Agro-Vets</p>
+                    </div>
+                </div>
+                <div class="stat-card stat-purple">
+                    <div class="stat-icon-wrap">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="activeDays">0</h3>
+                        <p>Active Days</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <h4><i class="fas fa-bolt"></i> Quick Actions</h4>
+                <div class="action-buttons">
+                    <button class="action-btn primary" data-nav="disease-detection">
+                        <i class="fas fa-camera"></i> Detect Disease
+                    </button>
+                    <button class="action-btn" data-nav="messages">
+                        <i class="fas fa-comment"></i> Message Agro-Vet
+                    </button>
+                    <button class="action-btn accent" data-nav="agrovets">
+                        <i class="fas fa-map-marker-alt"></i> Find Experts
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Disease Detection Section -->
+        <section id="disease-detection" class="dashboard-section">
+            <div class="section-header">
+                <h3><i class="fas fa-camera"></i> AI Disease Detection</h3>
+                <p>Upload or take a photo of your plant to identify diseases</p>
+            </div>
+            <!-- Modern detection UI is injected by disease-detection.js -->
+        </section>
+
+        <!-- Messages Section -->
+        <section id="messages" class="dashboard-section">
+            <div class="section-header">
+                <h3><i class="fas fa-comments"></i> Messages</h3>
+                <p>Communicate with Agro-Vets for expert advice</p>
+            </div>
+
+            <div class="chat-container">
+                <div class="chat-sidebar">
+                    <h4><i class="fas fa-comments"></i> Conversations</h4>
+                    <div class="conversation-list" id="conversationList"></div>
+                </div>
+                <div class="chat-area">
+                    <div class="chat-header" id="currentChatHeader">
+                        <p>Select a conversation to start messaging</p>
+                    </div>
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="placeholder-message">
+                            <i class="fas fa-comment-dots"></i>
+                            <p>Choose a conversation from the list</p>
+                        </div>
+                    </div>
+                    <div class="chat-input-area" id="chatInputArea" style="display: none;">
+                        <button class="voice-btn" id="voiceBtn" title="Record voice note"><i class="fas fa-microphone"></i></button>
+                        <button class="img-btn" id="imgBtn" title="Send image"><i class="fas fa-image"></i></button>
+                        <input type="file" id="chatImageUpload" accept="image/*" hidden>
+                        <textarea id="messageInput" placeholder="Type your message..." rows="1"></textarea>
+                        <button class="send-btn" id="sendMessageBtn"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Agro-Vets Section -->
+        <section id="agrovets" class="dashboard-section">
+            <div class="section-header">
+                <h3><i class="fas fa-user-md"></i> Nearby Agro-Vets</h3>
+                <p>Find certified agricultural experts in your area</p>
+            </div>
+            <div class="agrovets-grid" id="agrovetsList"></div>
+        </section>
+
+        <!-- Profile Section -->
+        <section id="profile" class="dashboard-section">
+            <div class="section-header">
+                <h3><i class="fas fa-user"></i> My Profile</h3>
+                <p>Manage your personal information</p>
+            </div>
+
+            <div class="profile-container">
+                <div class="profile-image-section">
+                    <img id="profilePreview" src="https://via.placeholder.com/120/2e7d32/ffffff?text=F" alt="Profile">
+                    <label for="profileUpload" class="btn-upload">
+                        <i class="fas fa-camera"></i> Change Photo
+                    </label>
+                    <input type="file" id="profileUpload" accept="image/*" hidden>
+                    <div class="profile-name-section">
+                        <p id="profileNameLarge" style="font-weight: 700;"></p>
+                        <small style="color: var(--text-muted);">Farmer</small>
+                    </div>
+                </div>
+
+                <div class="profile-info">
+                    <h4>Personal Information</h4>
+                    <div class="info-group">
+                        <label>Username</label>
+                        <p id="profileUsername">-</p>
+                    </div>
+                    <div class="info-group">
+                        <label>Email</label>
+                        <p id="profileEmail">-</p>
+                    </div>
+                    <div class="info-group">
+                        <label>Phone</label>
+                        <p id="profilePhone">-</p>
+                    </div>
+                    <div class="info-group">
+                        <label>Location</label>
+                        <p id="profileLocation">-</p>
+                    </div>
+                    <div class="info-group">
+                        <label>Role</label>
+                        <p id="profileRole">Farmer</p>
+                    </div>
+                    <div class="info-group">
+                        <label>Member Since</label>
+                        <p id="profileDate">-</p>
+                    </div>
+                    <button class="edit-profile-btn" id="editProfileBtn">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Activity History Section -->
+        <section id="history" class="dashboard-section">
+            <div class="section-header">
+                <h3><i class="fas fa-history"></i> Activity History</h3>
+                <p>Track your crop health monitoring activities</p>
+            </div>
+            <div class="activity-timeline" id="activityTimeline">
+                <div class="empty-state">
+                    <i class="fas fa-stream"></i>
+                    <p>No activity recorded yet.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Right Sidebar -->
+    <aside class="right-sidebar">
+        <h4><i class="fas fa-circle" style="color: #4caf50; font-size: 0.6rem;"></i> Online Agro-Vets</h4>
+        <div id="miniAgrovets"></div>
+    </aside>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <h3><i class="fas fa-edit" style="color: var(--primary);"></i> Edit Profile</h3>
+            <p>Update your personal information</p>
+            <input type="text" class="modal-input" id="editPhone" placeholder="Phone Number">
+            <input type="text" class="modal-input" id="editLocation" placeholder="Location">
+            <div class="modal-actions">
+                <button class="modal-cancel" id="cancelEdit">Cancel</button>
+                <button class="modal-confirm" id="saveProfile">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- AI Assistant Widget -->
+    <div class="ai-widget" id="aiWidget">
+        <button class="ai-toggle" id="aiToggle" aria-label="Open AI Assistant">
+            <i class="fas fa-robot"></i>
+        </button>
+        <div class="ai-chat-window" id="aiChatWindow">
+            <div class="ai-chat-header">
+                <i class="fas fa-robot"></i>
+                <span>Smart Crop Assistant</span>
+                <button class="ai-close" id="aiClose"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="ai-chat-messages" id="aiChatMessages"></div>
+            <div class="ai-chat-input">
+                <input type="text" id="aiInput" placeholder="Ask about diseases, history, advice...">
+                <button id="aiSendBtn"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/disease-detection.js"></script>
+    <!-- Socket.IO loaded dynamically from config -->
+    <script>
+        (function() {
+            var socketUrl = window.API_CONFIG ? window.API_CONFIG.SOCKET_URL : 'http://localhost:5001';
+            var script = document.createElement('script');
+            script.src = socketUrl + '/socket.io/socket.io.js';
+            script.onerror = function() { console.warn('[Socket.IO] Failed to load from ' + socketUrl); };
+            document.head.appendChild(script);
+        })();
+    </script>
+    <script src="js/farmer.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/theme.js"></script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+# ═══════════════════════════════════════════════════════════════
+# AgroSight AI — Grafana Dashboards Provisioning
+# ═══════════════════════════════════════════════════════════════
+# Auto-loads dashboards from JSON files in /var/lib/grafana/dashboards.
+# ═══════════════════════════════════════════════════════════════
+
+apiVersion: 1
+
+providers:
+  - name: 'AgroSight AI Dashboards'
+    orgId: 1
+    folder: 'AgroSight AI'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards

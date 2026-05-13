@@ -1,0 +1,52 @@
+# ═══════════════════════════════════════════════════════════════
+# AgroSight AI — Grafana Data Sources Provisioning
+# ═══════════════════════════════════════════════════════════════
+# Auto-configures Prometheus and Loki data sources on startup.
+# ═══════════════════════════════════════════════════════════════
+
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
+    jsonData:
+      timeInterval: "15s"
+      httpMethod: POST
+      manageAlerts: true
+      prometheusType: Prometheus
+      prometheusVersion: "2.51.0"
+      cacheLevel: 'High'
+      incrementalQuerying: true
+
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    editable: false
+    jsonData:
+      maxLines: 1000
+      derivedFields:
+        - name: trace_id
+          matcherRegex: '"trace_id":"(.*?)"'
+          url: '$${__value.raw}'
+
+  - name: PostgreSQL
+    type: postgres
+    access: proxy
+    url: postgres:5432
+    database: agrosight
+    user: agrosight
+    editable: false
+    secureJsonData:
+      password: '${POSTGRES_PASSWORD}'
+    jsonData:
+      sslmode: disable
+      maxOpenConns: 10
+      maxIdleConns: 5
+      connMaxLifetime: 14400
+      postgresVersion: 1600
+      timescaledb: false

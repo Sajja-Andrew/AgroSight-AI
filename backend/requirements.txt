@@ -1,0 +1,37 @@
+# ═══════════════════════════════════════════════════════════════
+# AgroSight AI — Minimal Production Requirements
+# ═══════════════════════════════════════════════════════════════
+# Installs ONLY what is needed for CPU inference + Flask API.
+# Removed: matplotlib, scipy, scikit-learn, opencv-python, boto3,
+#          jupyter, dev tools, CUDA packages.
+#
+# TensorFlow CPU is ~200 MB instead of ~1 GB for GPU version.
+# ═══════════════════════════════════════════════════════════════
+
+# ── Web Framework ──
+flask==3.0.0
+flask-cors==4.0.0
+flask-sqlalchemy==3.1.1
+flask-jwt-extended==4.6.0
+werkzeug==3.0.1
+
+# ── Production Server ──
+gunicorn==21.2.0
+python-dotenv==1.0.0
+
+# ── Database ──
+psycopg2-binary>=2.9.9
+flask-migrate>=4.0.0
+
+# ── Storage & Cache ──
+minio>=7.2.0
+redis>=5.0.0
+
+# ── Scheduling ──
+apscheduler>=3.10.1
+
+# ── AI / ML — CPU-Only ──
+tensorflow-cpu==2.16.1
+numpy==1.24.3
+pillow==10.1.0
+scikit-learn>=1.3.0

@@ -1,0 +1,21 @@
+FROM node:20-alpine
+WORKDIR /app
+
+# Install deps first (cacheable layer)
+COPY frontend/server/package.json ./
+RUN npm install --omit=dev --no-audit --no-fund --prefer-offline
+
+# Copy only server code (static HTML is served by nginx/web service)
+COPY frontend/server/ ./
+
+# Create uploads dir and ensure node user can write to it
+RUN mkdir -p uploads && chown -R node:node uploads
+
+ENV NODE_ENV=production \
+    PORT=5001
+
+EXPOSE 5001
+
+USER node
+
+CMD ["node", "server.js"]
