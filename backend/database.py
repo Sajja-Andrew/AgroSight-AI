@@ -6,8 +6,9 @@ SQLite with SQLAlchemy ORM
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-from sqlalchemy import event
+from sqlalchemy import event, func
 import json
+import math
 
 db = SQLAlchemy()
 
@@ -30,6 +31,12 @@ class User(db.Model):
     password_reset_token = db.Column(db.String(256), nullable=True)
     password_reset_expires = db.Column(db.DateTime, nullable=True)
 
+    # Location-based fields
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
+    is_online = db.Column(db.Boolean, default=False)
+    last_seen_at = db.Column(db.DateTime, nullable=True)
+
     detections = db.relationship('Detection', backref='user', lazy='dynamic', cascade='all, delete-orphan')
     activities = db.relationship('Activity', backref='user', lazy='dynamic', cascade='all, delete-orphan')
     sent_messages = db.relationship('Message', foreign_keys='Message.sender_id', backref='sender', lazy='dynamic')
@@ -49,6 +56,10 @@ class User(db.Model):
             'phone': self.phone,
             'role': self.role,
             'location': self.location,
+            'latitude': self.latitude,
+            'longitude': self.longitude,
+            'isOnline': self.is_online,
+            'lastSeenAt': self.last_seen_at.isoformat() if self.last_seen_at else None,
             'profilePicture': self.profile_picture,
             'createdAt': self.created_at.isoformat() if self.created_at else None,
             'updatedAt': self.updated_at.isoformat() if self.updated_at else None,
@@ -211,7 +222,8 @@ def init_app(app):
     # For local SQLite dev, migrations are still preferred over db.create_all().
 
 
-def create_user(username, email, password, phone=None, role='farmer', location=None, profile_picture=None):
+def create_user(username, email, password, phone=None, role='farmer', location=None,
+                profile_picture=None, latitude=None, longitude=None):
     """Create a new user with hashed password."""
     if User.query.filter((User.email == email) | (User.username == username)).first():
         return None, 'User with this email or username already exists'
@@ -222,6 +234,8 @@ def create_user(username, email, password, phone=None, role='farmer', location=N
         role=role,
         location=location,
         profile_picture=profile_picture,
+        latitude=latitude,
+        longitude=longitude,
     )
     user.set_password(password)
     db.session.add(user)
@@ -382,6 +396,101 @@ def get_all_users(role=None):
     if role:
         q = q.filter_by(role=role)
     return q.order_by(User.created_at.desc()).all()
+
+
+def haversine_distance(lat1, lng1, lat2, lng2):
+    """Calculate the great-circle distance between two points on earth in kilometers."""
+    if lat1 is None or lng1 is None or lat2 is None or lng2 is None:
+        return None
+    R = 6371.0  # Earth radius in km
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlng = math.radians(lng2 - lng1)
+    a = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlng / 2) ** 2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return R * c
+
+
+def get_nearby_agrovets(latitude, longitude, radius_km=50.0, limit=50):
+    """Return agrovets within radius_km using Haversine formula.
+    Works on both PostgreSQL and SQLite.
+    """
+    if latitude is None or longitude is None:
+        return []
+
+    # For PostgreSQL, use raw Haversine in SQL for performance
+    # For SQLite, compute in Python
+    db_uri = str(db.engine.url)
+    is_postgres = 'postgresql' in db_uri or 'postgres' in db_uri
+
+    if is_postgres:
+        # Earth radius in meters for PostgreSQL earthdistance-like math
+        R = 6371000.0
+        # Haversine raw SQL
+        distance_expr = (
+            R * func.acos(
+                func.least(1.0, func.greatest(-1.0,
+                    func.cos(func.radians(latitude)) *
+                    func.cos(func.radians(User.latitude)) *
+                    func.cos(func.radians(User.longitude - longitude)) +
+                    func.sin(func.radians(latitude)) *
+                    func.sin(func.radians(User.latitude))
+                ))
+            ) / 1000.0
+        )
+        results = (
+            User.query
+            .filter_by(role='agrovet')
+            .filter(User.latitude.isnot(None))
+            .filter(User.longitude.isnot(None))
+            .add_columns(distance_expr.label('distance'))
+            .filter(distance_expr <= radius_km)
+            .order_by(distance_expr.asc())
+            .limit(limit)
+            .all()
+        )
+        return [(u, d) for u, d in results]
+    else:
+        # SQLite fallback: filter roughly then compute exact distance in Python
+        # Rough bounding box filter (1 degree lat ~ 111km)
+        deg_offset = radius_km / 111.0
+        q = (
+            User.query
+            .filter_by(role='agrovet')
+            .filter(User.latitude.isnot(None))
+            .filter(User.longitude.isnot(None))
+            .filter(User.latitude.between(latitude - deg_offset, latitude + deg_offset))
+            .filter(User.longitude.between(longitude - deg_offset, longitude + deg_offset))
+            .all()
+        )
+        results = []
+        for user in q:
+            d = haversine_distance(latitude, longitude, user.latitude, user.longitude)
+            if d is not None and d <= radius_km:
+                results.append((user, d))
+        results.sort(key=lambda x: x[1])
+        return results[:limit]
+
+
+def update_user_location(user_id, latitude, longitude):
+    user = User.query.get(user_id)
+    if not user:
+        return None
+    user.latitude = latitude
+    user.longitude = longitude
+    db.session.commit()
+    return user
+
+
+def update_user_online_status(user_id, is_online):
+    user = User.query.get(user_id)
+    if not user:
+        return None
+    user.is_online = is_online
+    user.last_seen_at = datetime.utcnow()
+    db.session.commit()
+    return user
 
 
 def get_user_stats():
