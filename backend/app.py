@@ -374,6 +374,9 @@ def home():
             '/api/detections': 'GET - Detection history',
             '/api/messages': 'POST - Send message',
             '/api/messages/conversations': 'GET - Conversations',
+            '/api/auth/location': 'POST - Update GPS location',
+            '/api/agrovets/nearby': 'GET - Nearby agrovets (lat, lng, radius)',
+            '/api/users/online': 'GET/POST - Online status',
             '/api/feedback': 'POST - Submit feedback',
             '/api/health': 'GET - Health check',
             '/api/model-status': 'GET - Model status',
@@ -630,6 +633,20 @@ def update_me():
             user.location = sanitize_string(data['location'], max_length=200)
         if 'profile_picture' in data:
             user.profile_picture = data['profile_picture']
+        if 'latitude' in data:
+            try:
+                lat = float(data['latitude'])
+                if -90 <= lat <= 90:
+                    user.latitude = lat
+            except (ValueError, TypeError):
+                pass
+        if 'longitude' in data:
+            try:
+                lng = float(data['longitude'])
+                if -180 <= lng <= 180:
+                    user.longitude = lng
+            except (ValueError, TypeError):
+                pass
         if 'email' in data:
             from database import User as UserModel
             existing = UserModel.query.filter(UserModel.email == data['email'], UserModel.id != uid).first()
@@ -922,6 +939,139 @@ def list_agrovets():
         return jsonify({'success': True, 'count': len(agrovets), 'agrovets': [a.to_dict() for a in agrovets]})
     except Exception as e:
         logger.error(f"List agrovets error: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+# ── LOCATION & NEARBY AGROVETS ──
+@app.route('/api/auth/location', methods=['POST'])
+@jwt_required()
+def update_location():
+    """Update the authenticated user's GPS location."""
+    try:
+        uid = int(get_jwt_identity())
+        data = request.get_json() or {}
+        lat = data.get('latitude')
+        lng = data.get('longitude')
+
+        if lat is None or lng is None:
+            return jsonify({'success': False, 'message': 'latitude and longitude are required.'}), 400
+
+        try:
+            lat = float(lat)
+            lng = float(lng)
+            if not (-90 <= lat <= 90) or not (-180 <= lng <= 180):
+                raise ValueError('out of range')
+        except (ValueError, TypeError):
+            return jsonify({'success': False, 'message': 'Invalid latitude or longitude values.'}), 400
+
+        user = update_user_location(uid, lat, lng)
+        if not user:
+            return jsonify({'success': False, 'message': 'User not found.'}), 404
+
+        # Invalidate any cached nearby results that include this agrovet
+        if redis_client:
+            try:
+                for key in redis_client.scan_iter(match='agrosight:nearby:*'):
+                    redis_client.delete(key)
+            except Exception:
+                pass
+
+        return jsonify({'success': True, 'latitude': lat, 'longitude': lng})
+    except Exception as e:
+        logger.error(f"Update location error: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/agrovets/nearby', methods=['GET'])
+def nearby_agrovets():
+    """Find nearby agrovets using Haversine formula with Redis caching."""
+    try:
+        lat = request.args.get('lat', type=float)
+        lng = request.args.get('lng', type=float)
+        radius = request.args.get('radius', default=50.0, type=float)
+        limit = request.args.get('limit', default=50, type=int)
+
+        if lat is None or lng is None:
+            return jsonify({'success': False, 'message': 'lat and lng query parameters are required.'}), 400
+
+        if radius <= 0 or radius > 500:
+            radius = 50.0
+        if limit <= 0 or limit > 200:
+            limit = 50
+
+        cache_k = cache_key('nearby', lat, lng, radius, limit)
+        cached = get_cache(cache_k)
+        if cached is not None:
+            return jsonify({'success': True, 'cached': True, 'count': len(cached), 'agrovets': cached})
+
+        results = get_nearby_agrovets(lat, lng, radius_km=radius, limit=limit)
+        payload = []
+        for user, distance in results:
+            d = user.to_dict(include_email=False)
+            d['distance_km'] = round(distance, 2)
+            payload.append(d)
+
+        set_cache(cache_k, payload, ttl_seconds=60)
+        return jsonify({'success': True, 'cached': False, 'count': len(payload), 'agrovets': payload})
+    except Exception as e:
+        logger.error(f"Nearby agrovets error: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+# ── ONLINE STATUS ──
+@app.route('/api/users/online', methods=['POST'])
+@jwt_required()
+def heartbeat():
+    """Update online status and last-seen timestamp."""
+    try:
+        uid = int(get_jwt_identity())
+        user = update_user_online_status(uid, True)
+        if not user:
+            return jsonify({'success': False, 'message': 'User not found.'}), 404
+
+        # Also set a Redis TTL key so other instances know this user is online
+        if redis_client:
+            try:
+                redis_client.setex(f'agrosight:online:{uid}', 120, '1')
+            except Exception:
+                pass
+
+        return jsonify({'success': True, 'is_online': True})
+    except Exception as e:
+        logger.error(f"Heartbeat error: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/users/online', methods=['GET'])
+def online_users():
+    """List currently online users (with Redis-backed cross-instance support)."""
+    try:
+        online_ids = set()
+        # From Redis (cross-instance)
+        if redis_client:
+            try:
+                for key in redis_client.scan_iter(match='agrosight:online:*'):
+                    parts = key.split(':')
+                    if len(parts) >= 3:
+                        try:
+                            online_ids.add(int(parts[2]))
+                        except ValueError:
+                            pass
+            except Exception:
+                pass
+        # From DB (fallback for same-instance users)
+        db_online = User.query.filter_by(is_online=True).with_entities(User.id).all()
+        for row in db_online:
+            online_ids.add(row.id)
+
+        users = User.query.filter(User.id.in_(list(online_ids))).all()
+        return jsonify({
+            'success': True,
+            'count': len(users),
+            'users': [u.to_dict(include_email=False) for u in users]
+        })
+    except Exception as e:
+        logger.error(f"Online users error: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
 
