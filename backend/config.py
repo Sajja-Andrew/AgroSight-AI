@@ -58,6 +58,11 @@ LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO')
 ENABLE_SECURE_HEADERS = os.environ.get('ENABLE_SECURE_HEADERS', 'true').lower() in ('true', '1', 'yes')
 ENABLE_RATE_LIMITING = os.environ.get('ENABLE_RATE_LIMITING', 'true').lower() in ('true', '1', 'yes')
 
+# ── ADMIN SEED ──
+ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin')
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@agrosight.ai')
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'adminpass123')
+
 # â”€â”€ CHAT AI â”€â”€
 ENABLE_AI_CHAT = os.environ.get('ENABLE_AI_CHAT', 'true').lower() in ('true', '1', 'yes')
 

@@ -50,6 +50,9 @@ services:
       GUNICORN_KEEP_ALIVE: ${GUNICORN_KEEP_ALIVE:-2}
       FLASK_APP: /app/backend/app.py
       PYTHONPATH: /app:/app/backend
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@agrosight.ai}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-adminpass123}
     volumes:
       - ./saved_models:/app/saved_models:ro
       - ./saved_models_pytorch:/app/saved_models_pytorch:ro
@@ -109,6 +112,13 @@ services:
     environment:
       NODE_ENV: production
       PORT: 5001
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      FLASK_API_URL: ${FLASK_API_URL:-http://api:5000/api}
+    depends_on:
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_healthy
     networks:
       - agrosight-net
     healthcheck:

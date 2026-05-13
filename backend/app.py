@@ -95,6 +95,24 @@ from database import log_audit_action, get_audit_logs, reset_user_password, chan
 
 init_db(app)
 
+# ── SEED DEFAULT ADMIN ──
+with app.app_context():
+    try:
+        admin_email = app_config.ADMIN_EMAIL
+        admin_user = app_config.ADMIN_USERNAME
+        admin_pass = app_config.ADMIN_PASSWORD
+        existing = User.query.filter_by(role='admin').first()
+        if not existing:
+            admin, err = create_admin(admin_user, admin_email, admin_pass)
+            if admin:
+                logger.info(f"Default admin created: {admin_user} / {admin_email}")
+            else:
+                logger.warning(f"Admin creation skipped: {err}")
+        else:
+            logger.info(f"Admin account exists: {existing.username}")
+    except Exception as e:
+        logger.warning(f"Admin seed check failed: {e}")
+
 # ── REDIS CACHE ──
 redis_client = None
 if app_config.REDIS_ENABLED:
