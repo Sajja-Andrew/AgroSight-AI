@@ -14,6 +14,7 @@ if _parent_dir not in sys.path:
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token
+from flask_compress import Compress
 import json
 import uuid
 from datetime import datetime, timedelta
@@ -21,6 +22,8 @@ from PIL import Image
 import io
 import base64
 import logging
+import redis
+import hashlib
 
 # ── CONFIG ──
 import config as app_config
@@ -59,6 +62,18 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=app_config.JWT_ACCESS_TO
 app.config['ENABLE_RATE_LIMITING'] = app_config.ENABLE_RATE_LIMITING
 app.config['ENABLE_SECURE_HEADERS'] = app_config.ENABLE_SECURE_HEADERS
 
+# PostgreSQL connection pooling for performance
+if 'postgresql' in app_config.DATABASE_URI:
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'pool_size': 10,
+        'max_overflow': 20,
+        'pool_recycle': 1800,
+        'pool_pre_ping': True,
+    }
+
+# Gzip compression for responses
+Compress(app)
+
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # ── SECURITY MIDDLEWARE ──
@@ -74,10 +89,43 @@ from database import save_detection, get_detections_for_user, get_detection_by_i
 from database import save_message, get_conversation_messages, get_conversations_for_user, mark_conversation_read, get_unread_count
 from database import save_activity, get_activities_for_user
 from database import save_feedback, get_all_users, get_user_stats
+from database import get_nearby_agrovets, update_user_location, update_user_online_status
 from database import Message
 from database import log_audit_action, get_audit_logs, reset_user_password, change_user_password
 
 init_db(app)
+
+# ── REDIS CACHE ──
+redis_client = None
+if app_config.REDIS_ENABLED:
+    try:
+        redis_client = redis.from_url(app_config.REDIS_URL, decode_responses=True)
+        redis_client.ping()
+        logger.info("Redis cache connected")
+    except Exception as e:
+        logger.warning(f"Redis unavailable: {e}")
+        redis_client = None
+
+def cache_key(prefix, *parts):
+    h = hashlib.md5(json.dumps(parts, sort_keys=True).encode()).hexdigest()
+    return f"agrosight:{prefix}:{h}"
+
+def get_cache(key):
+    if redis_client:
+        try:
+            val = redis_client.get(key)
+            if val:
+                return json.loads(val)
+        except Exception:
+            pass
+    return None
+
+def set_cache(key, value, ttl_seconds=60):
+    if redis_client:
+        try:
+            redis_client.setex(key, ttl_seconds, json.dumps(value))
+        except Exception:
+            pass
 
 # ── DATABASE MIGRATIONS (Flask-Migrate / Alembic) ──
 try:
@@ -462,6 +510,23 @@ def register():
         phone = sanitize_string(data.get('phone') or '', max_length=20) or None
         role = sanitize_string(data.get('role') or 'farmer', max_length=20).lower()
         location = sanitize_string(data.get('location') or '', max_length=200) or None
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
+
+        if latitude is not None:
+            try:
+                latitude = float(latitude)
+                if not (-90 <= latitude <= 90):
+                    latitude = None
+            except (ValueError, TypeError):
+                latitude = None
+        if longitude is not None:
+            try:
+                longitude = float(longitude)
+                if not (-180 <= longitude <= 180):
+                    longitude = None
+            except (ValueError, TypeError):
+                longitude = None
 
         if not username or not email or not password:
             return jsonify({'success': False, 'message': 'Username, email, and password are required.'}), 400
@@ -474,7 +539,10 @@ def register():
         if role not in ('farmer', 'agrovet'):
             role = 'farmer'
 
-        user, err = create_user(username, email, password, phone=phone, role=role, location=location)
+        user, err = create_user(
+            username, email, password, phone=phone, role=role, location=location,
+            latitude=latitude, longitude=longitude
+        )
         if err:
             return jsonify({'success': False, 'message': err}), 409
 
