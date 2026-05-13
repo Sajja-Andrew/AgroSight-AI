@@ -1,0 +1,89 @@
+# ── Git / VCS ──
+.git
+.gitignore
+.gitattributes
+.github
+
+# ── Python ──
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info
+dist
+build
+venv*
+env/
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache
+.coverage
+htmlcov
+.tox
+backend/venv*
+backend/__pycache__
+backend/**/*.pyc
+
+# ── Node.js ──
+node_modules
+npm-debug.log*
+yarn-error.log*
+package-lock.json
+frontend/server/node_modules
+
+# ── IDE / OS ──
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ── Docker / CI ──
+Dockerfile*
+docker-compose*
+.dockerignore
+.claude/
+
+# ── Documentation ──
+README.md
+CHANGELOG.md
+LICENSE
+*.md
+OPTIMIZATION_GUIDE.md
+DEPLOYMENT.md
+
+# ── Local runtime data (use volumes instead) ──
+backend/instance/
+backend/uploads/
+backend/data/feedback.json
+backend/*.db
+*.db
+
+# ── Datasets (mount as volume, NEVER bake into image) ──
+dataset/
+backend/dataset/
+
+# ── Models (mount as read-only volume; keeps image < 1 GB) ──
+saved_models/
+saved_models_pytorch/
+
+# ── Experimental code ──
+backend/experimental/
+backend/model/app_old.py
+
+# ── Tests ──
+tests/
+pytest.ini
+run_tests.py
+run_tests.ps1
+backend/tests/
+
+# ── Render / Cloud configs ──
+render.yaml
+
+# ── Scripts (needed by entrypoint for MinIO init) ──
+# scripts/   # KEEP: entrypoint.sh needs init-minio.py at runtime

@@ -1,3 +1,7 @@
+# ═══════════════════════════════════════════════════════════
+# AgroSight AI — Git Ignore
+# ═══════════════════════════════════════════════════════════
+
 # Python
 __pycache__/
 *.py[cod]
@@ -11,12 +15,16 @@ ENV/
 .venv
 pip-log.txt
 pip-delete-this-directory.txt
+*.egg-info/
+dist/
+build/
 
 # Node
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+package-lock.json
 
 # IDEs
 .vscode/
@@ -28,37 +36,56 @@ yarn-error.log*
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
 
 # Environment / Secrets
 .env
-.env.*
+.env.local
+.env.*.local
 *.pem
 *.key
+*.p12
 
 # Database / Uploads
 *.db
 *.sqlite
 *.sqlite3
+backend/uploads/
+backend/instance/
 uploads/
 instance/
 
 # Logs
 *.log
 logs/
+saved_models/logs/
+saved_models/retrain_logs/
 
-# Models / Data (large files)
+# Models / Data (large files - DO NOT push to GitHub)
 *.keras
 *.h5
 *.pth
 *.pt
 *.onnx
-dataset/color/
-dataset/segmented/
-dataset/processed/
+*.pb
+*.tflite
+saved_models/
+saved_models_pytorch/
+dataset/
+feedback/
 
-# Render / Docker
-.dockerignore
+# Render
+render.yaml
+
+# Docker volumes
+postgres-data/
+minio-data/
+
+# Claude Code
+.claude/
 
 # Misc
 .temp/
 temp/
+*.bak
+*.tmp
